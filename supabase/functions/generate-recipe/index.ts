@@ -1,0 +1,79 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  try {
+    const { pdfText, craving, budget, mode } = await req.json();
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    const systemPrompt = `Du är en glad och kreativ svensk kock som hjälper folk att laga billig och god mat. Du svarar ALLTID på svenska.
+
+${mode === "weekly" ? `Skapa en veckomeny (måndag-söndag) med följande regler:
+- Måndag-torsdag: enkla vardagsrätter
+- Fredag: något extra enkelt (typ tacofredag eller snabb pasta)
+- Lördag-söndag: lite mer festlig mat
+- Varje dag ska ha: rättnamn, ingredienser med ungefärliga priser, och enkel tillagning
+- Total veckokostnad ska vara under budgeten` : `Skapa ETT recept med:
+- Rättnamn
+- Ingredienser med ungefärliga priser (SEK)
+- Steg-för-steg tillagning
+- Total ungefärlig kostnad (ska vara under budgeten)`}
+
+Formatera svaret i markdown. Använd emojis för att göra det roligt! 🍽️
+
+${pdfText ? `Här är erbjudanden från reklamblad att använda:\n${pdfText}` : "Inga reklamblad tillgängliga, föreslå vanliga billiga ingredienser."}
+
+Budget: ${budget} kr
+${craving ? `Användaren är sugen på: ${craving}` : "Inget speciellt önskemål."}`;
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: craving ? `Jag är sugen på ${craving} och har ${budget} kr att lägga.${mode === "weekly" ? " Gör en veckomeny!" : " Ge mig ett recept!"}` : `Ge mig ${mode === "weekly" ? "en veckomeny" : "ett recept"} för ${budget} kr.` },
+        ],
+        stream: true,
+      }),
+    });
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: "För många förfrågningar, vänta lite och försök igen." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "Krediter slut, ladda på i inställningarna." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const t = await response.text();
+      console.error("AI gateway error:", response.status, t);
+      return new Response(JSON.stringify({ error: "AI-fel, försök igen." }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(response.body, {
+      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+    });
+  } catch (e) {
+    console.error("recipe error:", e);
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Okänt fel" }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});
