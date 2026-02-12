@@ -162,7 +162,7 @@ const RecipeForm = () => {
       </div>
 
       {/* Result */}
-      {result && <RecipeResult content={result} />}
+      {result && <RecipeResult content={result} craving={craving} budget={budget} mode={mode} />}
     </div>
   );
 };
