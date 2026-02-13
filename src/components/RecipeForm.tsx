@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PdfUploader from "./PdfUploader";
 import RecipeResult from "./RecipeResult";
+import ShoppingList from "./ShoppingList";
 import { ChefHat, Sparkles, CalendarDays } from "lucide-react";
 
 const RecipeForm = () => {
@@ -162,7 +163,12 @@ const RecipeForm = () => {
       </div>
 
       {/* Result */}
-      {result && <RecipeResult content={result} craving={craving} budget={budget} mode={mode} />}
+      {result && (
+        <>
+          <RecipeResult content={result} craving={craving} budget={budget} mode={mode} />
+          {!isLoading && <ShoppingList content={result} />}
+        </>
+      )}
     </div>
   );
 };

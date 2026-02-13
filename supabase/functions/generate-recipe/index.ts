@@ -28,6 +28,14 @@ ${mode === "weekly" ? `Skapa en veckomeny (måndag-söndag) med följande regler
 
 Formatera svaret i markdown. Använd emojis för att göra det roligt! 🍽️
 
+VIKTIGT: Avsluta ALLTID med dessa två sektioner (använd exakt dessa rubriker):
+
+## 🛒 Inköpslista
+Lista alla ingredienser som behöver handlas, en per rad med "- " prefix. Inkludera ungefärlig mängd.
+
+## 🏠 Har du troligen hemma?
+Lista vanliga basvaror (salt, peppar, olja, smör, socker, mjöl, kryddor etc.) som receptet behöver men som de flesta har hemma. En per rad med "- " prefix.
+
 ${pdfText ? `Här är erbjudanden från reklamblad att använda:\n${pdfText}` : "Inga reklamblad tillgängliga, föreslå vanliga billiga ingredienser."}
 
 Budget: ${budget} kr
