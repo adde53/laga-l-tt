@@ -1,6 +1,12 @@
 import { useState, useRef } from "react";
-import { Upload, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Upload, X, Loader2 } from "lucide-react";
+import * as pdfjsLib from "pdfjs-dist";
+
+// Use the bundled worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.mjs",
+  import.meta.url
+).toString();
 
 interface PdfUploaderProps {
   onTextExtracted: (text: string) => void;
@@ -9,7 +15,25 @@ interface PdfUploaderProps {
 const PdfUploader = ({ onTextExtracted }: PdfUploaderProps) => {
   const [fileName, setFileName] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isExtracting, setIsExtracting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const extractTextFromPdf = async (file: File): Promise<string> => {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const pages: string[] = [];
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const text = content.items
+        .map((item: any) => item.str)
+        .join(" ");
+      pages.push(text);
+    }
+
+    return pages.join("\n\n");
+  };
 
   const handleFile = async (file: File) => {
     if (file.type !== "application/pdf") {
@@ -17,15 +41,21 @@ const PdfUploader = ({ onTextExtracted }: PdfUploaderProps) => {
       return;
     }
     setFileName(file.name);
-    // For now, we extract basic text. In production, use a PDF parser.
-    // We'll send the file name as context
-    const reader = new FileReader();
-    reader.onload = () => {
-      // Simple text extraction attempt
-      const text = `Reklamblad: ${file.name} (uppladdad PDF)`;
-      onTextExtracted(text);
-    };
-    reader.readAsText(file);
+    setIsExtracting(true);
+
+    try {
+      const text = await extractTextFromPdf(file);
+      if (text.trim().length < 10) {
+        onTextExtracted(`Reklamblad: ${file.name} (kunde inte extrahera text, kan vara en bildbaserad PDF)`);
+      } else {
+        onTextExtracted(text);
+      }
+    } catch (err) {
+      console.error("PDF extraction error:", err);
+      onTextExtracted(`Reklamblad: ${file.name} (kunde inte läsa PDF:en)`);
+    } finally {
+      setIsExtracting(false);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -53,7 +83,7 @@ const PdfUploader = ({ onTextExtracted }: PdfUploaderProps) => {
       onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
       onDragLeave={() => setIsDragging(false)}
       onDrop={handleDrop}
-      onClick={() => fileInputRef.current?.click()}
+      onClick={() => !isExtracting && fileInputRef.current?.click()}
     >
       <input
         ref={fileInputRef}
@@ -67,14 +97,23 @@ const PdfUploader = ({ onTextExtracted }: PdfUploaderProps) => {
       />
       {fileName ? (
         <div className="flex items-center justify-center gap-3">
-          <span className="text-2xl">📄</span>
-          <span className="font-medium text-foreground">{fileName}</span>
-          <button
-            onClick={(e) => { e.stopPropagation(); clear(); }}
-            className="p-1 rounded-full hover:bg-muted transition-colors"
-          >
-            <X className="w-4 h-4 text-muted-foreground" />
-          </button>
+          {isExtracting ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+              <span className="font-medium text-foreground">Läser {fileName}...</span>
+            </>
+          ) : (
+            <>
+              <span className="text-2xl">📄</span>
+              <span className="font-medium text-foreground">{fileName}</span>
+              <button
+                onClick={(e) => { e.stopPropagation(); clear(); }}
+                className="p-1 rounded-full hover:bg-muted transition-colors"
+              >
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </>
+          )}
         </div>
       ) : (
         <div className="space-y-2">

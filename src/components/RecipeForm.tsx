@@ -1,15 +1,28 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PdfUploader from "./PdfUploader";
 import RecipeResult from "./RecipeResult";
 import ShoppingList from "./ShoppingList";
-import { ChefHat, Sparkles, CalendarDays } from "lucide-react";
+import { ChefHat, Sparkles, CalendarDays, Store } from "lucide-react";
+
+const STORES = [
+  { value: "", label: "Ingen specifik butik" },
+  { value: "ica", label: "ICA" },
+  { value: "coop", label: "Coop" },
+  { value: "willys", label: "Willys" },
+  { value: "lidl", label: "Lidl" },
+  { value: "hemkop", label: "Hemköp" },
+  { value: "citygross", label: "City Gross" },
+  { value: "netto", label: "Netto" },
+];
 
 const RecipeForm = () => {
   const [pdfText, setPdfText] = useState("");
   const [craving, setCraving] = useState("");
   const [budget, setBudget] = useState("100");
+  const [store, setStore] = useState("");
   const [mode, setMode] = useState<"single" | "weekly">("single");
   const [result, setResult] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +40,7 @@ const RecipeForm = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ pdfText, craving, budget, mode }),
+          body: JSON.stringify({ pdfText, craving, budget, mode, store }),
         }
       );
 
@@ -116,7 +129,24 @@ const RecipeForm = () => {
         />
       </div>
 
-      {/* Mode toggle */}
+      {/* Store selector */}
+      <div className="space-y-3 animate-fade-in-up" style={{ animationDelay: "0.35s" }}>
+        <label className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
+          <Store className="w-5 h-5" /> Butik (valfritt)
+        </label>
+        <Select value={store} onValueChange={setStore}>
+          <SelectTrigger className="h-12 text-base rounded-lg border-2 focus:border-primary">
+            <SelectValue placeholder="Välj butik för bättre erbjudanden" />
+          </SelectTrigger>
+          <SelectContent>
+            {STORES.map((s) => (
+              <SelectItem key={s.value} value={s.value || "none"}>
+                {s.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
       <div className="flex gap-3 animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
         <Button
           variant={mode === "single" ? "hero" : "hero-outline"}
