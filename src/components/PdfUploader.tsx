@@ -2,7 +2,6 @@ import { useState, useRef } from "react";
 import { Upload, X, Loader2 } from "lucide-react";
 import * as pdfjsLib from "pdfjs-dist";
 
-// Use the bundled worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.mjs",
   import.meta.url
@@ -73,12 +72,12 @@ const PdfUploader = ({ onTextExtracted }: PdfUploaderProps) => {
 
   return (
     <div
-      className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200 cursor-pointer ${
+      className={`relative rounded-xl p-5 text-center transition-all duration-150 cursor-pointer border-2 border-dashed ${
         isDragging
-          ? "border-primary bg-primary/5 scale-[1.02]"
+          ? "border-primary bg-primary/5 scale-[1.01]"
           : fileName
-          ? "border-secondary bg-secondary/5"
-          : "border-border hover:border-primary/50 hover:bg-muted/50"
+          ? "border-secondary/40 bg-secondary/5"
+          : "border-border hover:border-primary/40 hover:bg-muted/40"
       }`}
       onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
       onDragLeave={() => setIsDragging(false)}
@@ -96,33 +95,33 @@ const PdfUploader = ({ onTextExtracted }: PdfUploaderProps) => {
         }}
       />
       {fileName ? (
-        <div className="flex items-center justify-center gap-3">
+        <div className="flex items-center justify-center gap-2.5">
           {isExtracting ? (
             <>
-              <Loader2 className="w-5 h-5 animate-spin text-primary" />
-              <span className="font-medium text-foreground">Läser {fileName}...</span>
+              <Loader2 className="w-4 h-4 animate-spin text-primary" />
+              <span className="font-body text-sm text-foreground">Läser {fileName}...</span>
             </>
           ) : (
             <>
-              <span className="text-2xl">📄</span>
-              <span className="font-medium text-foreground">{fileName}</span>
+              <span className="text-lg">📄</span>
+              <span className="font-body text-sm font-medium text-foreground">{fileName}</span>
               <button
                 onClick={(e) => { e.stopPropagation(); clear(); }}
                 className="p-1 rounded-full hover:bg-muted transition-colors"
               >
-                <X className="w-4 h-4 text-muted-foreground" />
+                <X className="w-3.5 h-3.5 text-muted-foreground" />
               </button>
             </>
           )}
         </div>
       ) : (
-        <div className="space-y-2">
-          <Upload className="w-8 h-8 mx-auto text-muted-foreground" />
-          <p className="font-medium text-foreground">
-            Dra & släpp ett reklamblad här
+        <div className="space-y-1">
+          <Upload className="w-6 h-6 mx-auto text-muted-foreground" />
+          <p className="font-body text-sm font-medium text-foreground">
+            Dra & släpp ett reklamblad
           </p>
-          <p className="text-sm text-muted-foreground">
-            eller klicka för att välja en PDF
+          <p className="text-xs text-muted-foreground">
+            eller klicka för att välja PDF
           </p>
         </div>
       )}

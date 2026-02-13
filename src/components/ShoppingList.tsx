@@ -30,21 +30,25 @@ const CheckableList = ({ items, label, icon }: { items: string[]; label: string;
   if (items.length === 0) return null;
 
   return (
-    <div className="space-y-3">
-      <h3 className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
+    <div className="space-y-2.5">
+      <h3 className="font-display text-base font-semibold text-foreground flex items-center gap-2">
         {icon} {label}
+        <span className="text-xs font-body font-normal text-muted-foreground ml-auto">
+          {checked.size}/{items.length}
+        </span>
       </h3>
-      <ul className="space-y-2">
+      <ul className="space-y-1.5">
         {items.map((item, i) => (
-          <li key={i} className="flex items-center gap-3">
+          <li key={i} className="flex items-center gap-2.5 py-0.5">
             <Checkbox
               checked={checked.has(i)}
               onCheckedChange={() => toggle(i)}
               id={`item-${label}-${i}`}
+              className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
             />
             <label
               htmlFor={`item-${label}-${i}`}
-              className={`text-sm font-body cursor-pointer select-none ${
+              className={`text-sm font-body cursor-pointer select-none transition-colors ${
                 checked.has(i) ? "line-through text-muted-foreground" : "text-foreground"
               }`}
             >
@@ -53,9 +57,6 @@ const CheckableList = ({ items, label, icon }: { items: string[]; label: string;
           </li>
         ))}
       </ul>
-      <p className="text-xs text-muted-foreground">
-        {checked.size}/{items.length} avprickade
-      </p>
     </div>
   );
 };
@@ -67,17 +68,20 @@ const ShoppingList = ({ content }: ShoppingListProps) => {
   if (shoppingItems.length === 0 && homeItems.length === 0) return null;
 
   return (
-    <div className="animate-fade-in-up mt-6">
-      <div className="bg-card rounded-xl p-6 md:p-8 shadow-card border border-border space-y-6">
+    <div className="animate-fade-in-up mt-4">
+      <div className="card-warm p-5 md:p-7 space-y-5">
         <CheckableList
           items={shoppingItems}
           label="Inköpslista"
-          icon={<ShoppingCart className="w-5 h-5 text-primary" />}
+          icon={<ShoppingCart className="w-4 h-4 text-primary" />}
         />
+        {homeItems.length > 0 && shoppingItems.length > 0 && (
+          <div className="border-t border-border" />
+        )}
         <CheckableList
           items={homeItems}
           label="Har du troligen hemma?"
-          icon={<Home className="w-5 h-5 text-muted-foreground" />}
+          icon={<Home className="w-4 h-4 text-muted-foreground" />}
         />
       </div>
     </div>

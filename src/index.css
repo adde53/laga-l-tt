@@ -2,84 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap');
 
 @layer base {
   :root {
-    --background: 40 33% 96%;
-    --foreground: 20 25% 15%;
+    --background: 38 40% 97%;
+    --foreground: 15 30% 12%;
 
-    --card: 40 40% 98%;
-    --card-foreground: 20 25% 15%;
+    --card: 35 50% 99%;
+    --card-foreground: 15 30% 12%;
 
-    --popover: 40 40% 98%;
-    --popover-foreground: 20 25% 15%;
+    --popover: 35 50% 99%;
+    --popover-foreground: 15 30% 12%;
 
-    --primary: 25 95% 53%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 14 80% 50%;
+    --primary-foreground: 40 60% 98%;
 
-    --secondary: 145 45% 45%;
+    --secondary: 160 35% 42%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 35 25% 90%;
-    --muted-foreground: 20 10% 45%;
+    --muted: 32 30% 92%;
+    --muted-foreground: 15 12% 50%;
 
-    --accent: 45 100% 60%;
-    --accent-foreground: 20 25% 15%;
+    --accent: 42 90% 62%;
+    --accent-foreground: 15 30% 12%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 35 20% 85%;
-    --input: 35 20% 85%;
-    --ring: 25 95% 53%;
+    --border: 30 25% 88%;
+    --input: 30 25% 88%;
+    --ring: 14 80% 50%;
 
-    --radius: 1rem;
+    --radius: 0.875rem;
 
-    --sidebar-background: 40 30% 95%;
-    --sidebar-foreground: 20 25% 15%;
-    --sidebar-primary: 25 95% 53%;
+    --sidebar-background: 38 35% 95%;
+    --sidebar-foreground: 15 30% 12%;
+    --sidebar-primary: 14 80% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 35 25% 90%;
-    --sidebar-accent-foreground: 20 25% 15%;
-    --sidebar-border: 35 20% 85%;
-    --sidebar-ring: 25 95% 53%;
-
-    /* Custom tokens */
-    --warm-gradient: linear-gradient(135deg, hsl(25, 95%, 53%), hsl(45, 100%, 60%));
-    --hero-gradient: linear-gradient(180deg, hsl(40, 33%, 96%) 0%, hsl(35, 40%, 92%) 100%);
-    --food-shadow: 0 8px 32px -8px hsl(25 95% 53% / 0.2);
-    --card-shadow: 0 4px 16px -4px hsl(20 25% 15% / 0.08);
+    --sidebar-accent: 32 30% 92%;
+    --sidebar-accent-foreground: 15 30% 12%;
+    --sidebar-border: 30 25% 88%;
+    --sidebar-ring: 14 80% 50%;
   }
 
   .dark {
-    --background: 20 20% 10%;
-    --foreground: 40 30% 92%;
-    --card: 20 18% 14%;
-    --card-foreground: 40 30% 92%;
-    --popover: 20 18% 14%;
-    --popover-foreground: 40 30% 92%;
-    --primary: 25 95% 58%;
+    --background: 15 18% 8%;
+    --foreground: 35 30% 90%;
+    --card: 15 16% 12%;
+    --card-foreground: 35 30% 90%;
+    --popover: 15 16% 12%;
+    --popover-foreground: 35 30% 90%;
+    --primary: 14 75% 55%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 145 40% 40%;
+    --secondary: 160 30% 38%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 20 15% 20%;
-    --muted-foreground: 35 15% 60%;
-    --accent: 45 90% 55%;
-    --accent-foreground: 20 20% 10%;
+    --muted: 15 12% 18%;
+    --muted-foreground: 30 15% 55%;
+    --accent: 42 80% 50%;
+    --accent-foreground: 15 18% 8%;
     --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 100%;
-    --border: 20 15% 22%;
-    --input: 20 15% 22%;
-    --ring: 25 95% 58%;
-    --sidebar-background: 20 20% 10%;
-    --sidebar-foreground: 40 30% 92%;
-    --sidebar-primary: 25 95% 58%;
+    --border: 15 12% 20%;
+    --input: 15 12% 20%;
+    --ring: 14 75% 55%;
+    --sidebar-background: 15 18% 8%;
+    --sidebar-foreground: 35 30% 90%;
+    --sidebar-primary: 14 75% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 20 15% 20%;
-    --sidebar-accent-foreground: 40 30% 92%;
-    --sidebar-border: 20 15% 22%;
-    --sidebar-ring: 25 95% 58%;
+    --sidebar-accent: 15 12% 18%;
+    --sidebar-accent-foreground: 35 30% 90%;
+    --sidebar-border: 15 12% 20%;
+    --sidebar-ring: 14 75% 55%;
   }
 }
 
@@ -89,7 +83,7 @@
   }
 
   body {
-    @apply bg-background text-foreground font-body;
+    @apply bg-background text-foreground font-body antialiased;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -104,16 +98,71 @@
   .font-body {
     font-family: 'Nunito', sans-serif;
   }
-  .bg-warm-gradient {
-    background: var(--warm-gradient);
+}
+
+@layer components {
+  .page-shell {
+    @apply min-h-screen bg-background;
+    background-image: 
+      radial-gradient(ellipse at 20% 0%, hsl(var(--primary) / 0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, hsl(var(--accent) / 0.06) 0%, transparent 50%);
   }
-  .bg-hero-gradient {
-    background: var(--hero-gradient);
+
+  .card-warm {
+    @apply bg-card rounded-2xl border border-border;
+    box-shadow:
+      0 1px 2px hsl(var(--foreground) / 0.03),
+      0 4px 16px -4px hsl(var(--foreground) / 0.06);
   }
-  .shadow-food {
-    box-shadow: var(--food-shadow);
+
+  .card-warm:hover {
+    box-shadow:
+      0 2px 4px hsl(var(--foreground) / 0.04),
+      0 8px 24px -4px hsl(var(--primary) / 0.1);
   }
-  .shadow-card {
-    box-shadow: var(--card-shadow);
+
+  .btn-generate {
+    @apply relative overflow-hidden font-display font-semibold text-lg tracking-wide;
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(14 80% 44%));
+    color: hsl(var(--primary-foreground));
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 14px -3px hsl(var(--primary) / 0.4);
+  }
+
+  .btn-generate:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px -3px hsl(var(--primary) / 0.5);
+  }
+
+  .btn-generate:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  .input-field {
+    @apply h-12 text-base rounded-xl border-2 border-border bg-card px-4 font-body;
+    @apply focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .section-label {
+    @apply font-display text-base font-semibold text-foreground flex items-center gap-2;
+  }
+
+  .pill-toggle {
+    @apply flex-1 h-12 rounded-xl font-display font-semibold text-base transition-all duration-150;
+  }
+
+  .pill-toggle-active {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(14 80% 44%));
+    color: hsl(var(--primary-foreground));
+    box-shadow: 0 2px 8px -2px hsl(var(--primary) / 0.35);
+  }
+
+  .pill-toggle-inactive {
+    @apply bg-muted text-muted-foreground;
+  }
+
+  .pill-toggle-inactive:hover {
+    @apply bg-muted/80 text-foreground;
   }
 }

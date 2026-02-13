@@ -5,10 +5,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import PdfUploader from "./PdfUploader";
 import RecipeResult from "./RecipeResult";
 import ShoppingList from "./ShoppingList";
-import { ChefHat, Sparkles, CalendarDays, Store } from "lucide-react";
+import { ChefHat, Sparkles, CalendarDays } from "lucide-react";
 
 const STORES = [
-  { value: "", label: "Ingen specifik butik" },
+  { value: "none", label: "Ingen specifik butik" },
   { value: "ica", label: "ICA" },
   { value: "coop", label: "Coop" },
   { value: "willys", label: "Willys" },
@@ -22,7 +22,7 @@ const RecipeForm = () => {
   const [pdfText, setPdfText] = useState("");
   const [craving, setCraving] = useState("");
   const [budget, setBudget] = useState("100");
-  const [store, setStore] = useState("");
+  const [store, setStore] = useState("none");
   const [mode, setMode] = useState<"single" | "weekly">("single");
   const [result, setResult] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -92,104 +92,94 @@ const RecipeForm = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* PDF Upload */}
-      <div className="space-y-3 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
-        <label className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
-          📰 Reklamblad (valfritt)
+      <div className="space-y-2 animate-fade-in-up" style={{ animationDelay: "0.05s" }}>
+        <label className="section-label">
+          📰 Reklamblad <span className="text-muted-foreground font-body text-sm font-normal">(valfritt)</span>
         </label>
         <PdfUploader onTextExtracted={setPdfText} />
       </div>
 
-      {/* Craving input */}
-      <div className="space-y-3 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
-        <label className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
-          🤤 Vad är du sugen på?
-        </label>
+      {/* Craving */}
+      <div className="space-y-2 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+        <label className="section-label">🤤 Vad är du sugen på?</label>
         <Input
-          placeholder="T.ex. krämig pasta, kycklinggryta, vegetariskt..."
+          placeholder="Krämig pasta, kycklinggryta, vegetariskt..."
           value={craving}
           onChange={(e) => setCraving(e.target.value)}
-          className="h-12 text-base rounded-lg border-2 focus:border-primary"
+          className="input-field"
         />
       </div>
 
-      {/* Budget */}
-      <div className="space-y-3 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
-        <label className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
-          💰 Budget (kronor)
-        </label>
-        <Input
-          type="number"
-          placeholder="100"
-          value={budget}
-          onChange={(e) => setBudget(e.target.value)}
-          className="h-12 text-base rounded-lg border-2 focus:border-primary"
-          min="20"
-        />
+      {/* Budget + Store row */}
+      <div className="grid grid-cols-2 gap-3 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
+        <div className="space-y-2">
+          <label className="section-label">💰 Budget</label>
+          <Input
+            type="number"
+            placeholder="100 kr"
+            value={budget}
+            onChange={(e) => setBudget(e.target.value)}
+            className="input-field"
+            min="20"
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="section-label">🏪 Butik</label>
+          <Select value={store} onValueChange={setStore}>
+            <SelectTrigger className="input-field w-full">
+              <SelectValue placeholder="Välj butik" />
+            </SelectTrigger>
+            <SelectContent className="bg-card border-border">
+              {STORES.map((s) => (
+                <SelectItem key={s.value} value={s.value}>
+                  {s.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      {/* Store selector */}
-      <div className="space-y-3 animate-fade-in-up" style={{ animationDelay: "0.35s" }}>
-        <label className="font-display text-lg font-semibold text-foreground flex items-center gap-2">
-          <Store className="w-5 h-5" /> Butik (valfritt)
-        </label>
-        <Select value={store} onValueChange={setStore}>
-          <SelectTrigger className="h-12 text-base rounded-lg border-2 focus:border-primary">
-            <SelectValue placeholder="Välj butik för bättre erbjudanden" />
-          </SelectTrigger>
-          <SelectContent>
-            {STORES.map((s) => (
-              <SelectItem key={s.value} value={s.value || "none"}>
-                {s.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="flex gap-3 animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
-        <Button
-          variant={mode === "single" ? "hero" : "hero-outline"}
-          size="lg"
-          className="flex-1"
+      {/* Mode toggle */}
+      <div className="flex gap-2 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+        <button
+          className={`pill-toggle ${mode === "single" ? "pill-toggle-active" : "pill-toggle-inactive"}`}
           onClick={() => setMode("single")}
           type="button"
         >
-          <ChefHat className="w-5 h-5" />
+          <ChefHat className="w-4 h-4 inline mr-1.5 -mt-0.5" />
           Ett recept
-        </Button>
-        <Button
-          variant={mode === "weekly" ? "hero" : "hero-outline"}
-          size="lg"
-          className="flex-1"
+        </button>
+        <button
+          className={`pill-toggle ${mode === "weekly" ? "pill-toggle-active" : "pill-toggle-inactive"}`}
           onClick={() => setMode("weekly")}
           type="button"
         >
-          <CalendarDays className="w-5 h-5" />
+          <CalendarDays className="w-4 h-4 inline mr-1.5 -mt-0.5" />
           Veckomeny
-        </Button>
+        </button>
       </div>
 
-      {/* Generate button */}
-      <div className="animate-fade-in-up" style={{ animationDelay: "0.5s" }}>
-        <Button
-          variant="hero"
-          size="lg"
-          className="w-full h-14 text-xl"
+      {/* Generate */}
+      <div className="animate-fade-in-up" style={{ animationDelay: "0.25s" }}>
+        <button
+          className="btn-generate w-full h-14 rounded-xl text-lg disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           onClick={handleGenerate}
           disabled={isLoading}
         >
           {isLoading ? (
             <>
-              <span className="animate-spin">🍳</span> Lagar mat...
+              <span className="animate-spin inline-block">🍳</span> Lagar mat...
             </>
           ) : (
             <>
-              <Sparkles className="w-6 h-6" />
+              <Sparkles className="w-5 h-5" />
               {mode === "weekly" ? "Skapa veckomeny!" : "Ge mig ett recept!"}
             </>
           )}
-        </Button>
+        </button>
       </div>
 
       {/* Result */}

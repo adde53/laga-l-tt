@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
 import { Bookmark, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -20,19 +19,17 @@ const RecipeResult = ({ content, craving, budget, mode }: RecipeResultProps) => 
   const [saving, setSaving] = useState(false);
 
   const htmlContent = useMemo(() => {
-    let html = content
-      .replace(/^### (.+)$/gm, '<h3 class="font-display text-lg font-semibold text-primary mt-4 mb-2">$1</h3>')
-      .replace(/^## (.+)$/gm, '<h2 class="font-display text-xl font-bold text-foreground mt-6 mb-3">$1</h2>')
-      .replace(/^# (.+)$/gm, '<h1 class="font-display text-2xl font-bold text-foreground mt-6 mb-3">$1</h1>')
+    return content
+      .replace(/^### (.+)$/gm, '<h3 class="font-display text-base font-semibold text-primary mt-4 mb-1">$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2 class="font-display text-lg font-bold text-foreground mt-5 mb-2">$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1 class="font-display text-xl font-bold text-foreground mt-5 mb-2">$1</h1>')
       .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold">$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc text-foreground/90">$1</li>')
-      .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 list-decimal text-foreground/90">$2</li>')
+      .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc text-foreground/85 leading-relaxed">$1</li>')
+      .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 list-decimal text-foreground/85 leading-relaxed">$2</li>')
       .replace(/\n\n/g, '<br/><br/>');
-    return html;
   }, [content]);
 
-  // Extract a title from the first heading or first line
   const extractTitle = () => {
     const match = content.match(/^#+\s*(.+)$/m);
     if (match) return match[1].replace(/[*_#]/g, "").trim();
@@ -68,33 +65,29 @@ const RecipeResult = ({ content, craving, budget, mode }: RecipeResultProps) => 
 
   return (
     <div className="animate-fade-in-up">
-      <div className="bg-card rounded-xl p-6 md:p-8 shadow-card border border-border">
+      <div className="card-warm p-5 md:p-7">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <span className="text-3xl">🍽️</span>
-            <h2 className="font-display text-2xl font-bold text-foreground">
-              Ditt recept
-            </h2>
-          </div>
-          <Button
-            variant={saved ? "secondary" : "hero"}
-            size="sm"
+          <h2 className="font-display text-xl font-bold text-foreground flex items-center gap-2">
+            <span className="text-2xl">🍽️</span> Ditt recept
+          </h2>
+          <button
             onClick={handleSave}
             disabled={saving || saved}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-display font-semibold transition-all ${
+              saved
+                ? "bg-secondary/15 text-secondary"
+                : "bg-primary/10 text-primary hover:bg-primary/20"
+            } disabled:opacity-60`}
           >
             {saved ? (
-              <>
-                <Check className="w-4 h-4" /> Sparat
-              </>
+              <><Check className="w-3.5 h-3.5" /> Sparat</>
             ) : (
-              <>
-                <Bookmark className="w-4 h-4" /> Spara
-              </>
+              <><Bookmark className="w-3.5 h-3.5" /> Spara</>
             )}
-          </Button>
+          </button>
         </div>
         <div
-          className="prose prose-sm max-w-none text-foreground/90 leading-relaxed font-body"
+          className="text-sm leading-relaxed font-body text-foreground/85"
           dangerouslySetInnerHTML={{ __html: htmlContent }}
         />
       </div>
