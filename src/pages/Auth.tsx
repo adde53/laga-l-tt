@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -39,29 +38,30 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-hero-gradient flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="page-shell flex items-center justify-center px-5 min-h-screen">
+      <div className="w-full max-w-sm">
         <div className="text-center mb-8 animate-fade-in-up">
-          <h1 className="font-display text-4xl font-bold text-foreground">🍳 Matbudgeten</h1>
-          <p className="text-muted-foreground mt-2 font-body">
+          <p className="text-4xl mb-2">🍳</p>
+          <h1 className="font-display text-2xl font-bold text-foreground">Matbudgeten</h1>
+          <p className="text-muted-foreground mt-1 font-body text-sm">
             {isLogin ? "Logga in för att spara dina recept" : "Skapa ett konto"}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-card rounded-xl p-6 shadow-card border border-border space-y-4 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
-          <div className="space-y-2">
-            <label className="font-display font-semibold text-foreground">E-post</label>
+        <form onSubmit={handleSubmit} className="card-warm p-6 space-y-4 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+          <div className="space-y-1.5">
+            <label className="section-label text-sm">E-post</label>
             <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="din@epost.se"
               required
-              className="h-12 text-base rounded-lg border-2 focus:border-primary"
+              className="input-field"
             />
           </div>
-          <div className="space-y-2">
-            <label className="font-display font-semibold text-foreground">Lösenord</label>
+          <div className="space-y-1.5">
+            <label className="section-label text-sm">Lösenord</label>
             <Input
               type="password"
               value={password}
@@ -69,12 +69,16 @@ const Auth = () => {
               placeholder="Minst 6 tecken"
               required
               minLength={6}
-              className="h-12 text-base rounded-lg border-2 focus:border-primary"
+              className="input-field"
             />
           </div>
-          <Button variant="hero" size="lg" className="w-full h-12" type="submit" disabled={loading}>
+          <button
+            className="btn-generate w-full h-12 rounded-xl text-base disabled:opacity-60"
+            type="submit"
+            disabled={loading}
+          >
             {loading ? "⏳ Vänta..." : isLogin ? "Logga in" : "Skapa konto"}
-          </Button>
+          </button>
           <p className="text-center text-sm text-muted-foreground font-body">
             {isLogin ? "Inget konto?" : "Har redan konto?"}{" "}
             <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-primary font-semibold hover:underline">
