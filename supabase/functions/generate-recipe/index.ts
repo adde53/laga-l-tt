@@ -9,7 +9,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { pdfText, craving, budget, mode } = await req.json();
+    const { pdfText, craving, budget, mode, store } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -36,7 +36,9 @@ Lista alla ingredienser som behöver handlas, en per rad med "- " prefix. Inklud
 ## 🏠 Har du troligen hemma?
 Lista vanliga basvaror (salt, peppar, olja, smör, socker, mjöl, kryddor etc.) som receptet behöver men som de flesta har hemma. En per rad med "- " prefix.
 
-${pdfText ? `Här är erbjudanden från reklamblad att använda:\n${pdfText}` : "Inga reklamblad tillgängliga, föreslå vanliga billiga ingredienser."}
+${pdfText ? `Här är erbjudanden från reklamblad att använda:\n${pdfText}` : "Inga reklamblad tillgängliga."}
+
+${store && store !== "none" ? `Användaren handlar på ${store.toUpperCase()}. Prioritera ingredienser och produkter som brukar finnas till bra pris på ${store.toUpperCase()}. Använd din kunskap om butikens sortiment, egna varumärken och typiska erbjudanden.` : "Ingen specifik butik vald, föreslå vanliga billiga ingredienser."}
 
 Budget: ${budget} kr
 ${craving ? `Användaren är sugen på: ${craving}` : "Inget speciellt önskemål."}`;
