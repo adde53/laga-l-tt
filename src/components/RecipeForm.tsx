@@ -5,7 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import PdfUploader from "./PdfUploader";
 import RecipeResult from "./RecipeResult";
 import ShoppingList from "./ShoppingList";
-import { ChefHat, Sparkles, CalendarDays } from "lucide-react";
+import { ChefHat, Sparkles, CalendarDays, Download, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 const STORES = [
   { value: "none", label: "Ingen specifik butik" },
@@ -26,6 +27,41 @@ const RecipeForm = () => {
   const [mode, setMode] = useState<"single" | "weekly">("single");
   const [result, setResult] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingDeals, setIsFetchingDeals] = useState(false);
+  const [dealsLoaded, setDealsLoaded] = useState(false);
+
+  const handleFetchDeals = async () => {
+    if (store === "none") {
+      toast.error("Välj en butik först!");
+      return;
+    }
+    setIsFetchingDeals(true);
+    try {
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-store-deals`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ store }),
+        }
+      );
+      const data = await resp.json();
+      if (data.success && data.text) {
+        setPdfText((prev) => prev ? prev + "\n\n---\n\n" + data.text : data.text);
+        setDealsLoaded(true);
+        toast.success("Erbjudanden hämtade! 🎉");
+      } else {
+        toast.error(data.error || "Kunde inte hämta erbjudanden");
+      }
+    } catch {
+      toast.error("Något gick fel vid hämtning av erbjudanden");
+    } finally {
+      setIsFetchingDeals(false);
+    }
+  };
 
   const handleGenerate = async () => {
     setIsLoading(true);
@@ -127,7 +163,7 @@ const RecipeForm = () => {
         </div>
         <div className="space-y-2">
           <label className="section-label">🏪 Butik</label>
-          <Select value={store} onValueChange={setStore}>
+          <Select value={store} onValueChange={(v) => { setStore(v); setDealsLoaded(false); }}>
             <SelectTrigger className="input-field w-full">
               <SelectValue placeholder="Välj butik" />
             </SelectTrigger>
@@ -141,6 +177,29 @@ const RecipeForm = () => {
           </Select>
         </div>
       </div>
+
+      {/* Fetch deals button */}
+      {store !== "none" && (
+        <div className="animate-fade-in-up" style={{ animationDelay: "0.17s" }}>
+          <button
+            onClick={handleFetchDeals}
+            disabled={isFetchingDeals || dealsLoaded}
+            className={`w-full h-10 rounded-xl text-sm font-display font-semibold flex items-center justify-center gap-2 transition-all ${
+              dealsLoaded
+                ? "bg-secondary/15 text-secondary"
+                : "bg-primary/10 text-primary hover:bg-primary/20"
+            } disabled:opacity-60 disabled:cursor-not-allowed`}
+          >
+            {isFetchingDeals ? (
+              <><Loader2 className="w-4 h-4 animate-spin" /> Hämtar erbjudanden...</>
+            ) : dealsLoaded ? (
+              <>✅ Erbjudanden hämtade</>
+            ) : (
+              <><Download className="w-4 h-4" /> Hämta {STORES.find(s => s.value === store)?.label}-erbjudanden automatiskt</>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Mode toggle */}
       <div className="flex gap-2 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
