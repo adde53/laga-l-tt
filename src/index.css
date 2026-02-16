@@ -102,10 +102,70 @@
 
 @layer components {
   .page-shell {
-    @apply min-h-screen bg-background;
-    background-image: 
-      radial-gradient(ellipse at 20% 0%, hsl(var(--primary) / 0.04) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 100%, hsl(var(--accent) / 0.06) 0%, transparent 50%);
+    @apply min-h-screen bg-background relative overflow-hidden;
+  }
+
+  /* Floating food decorations */
+  .page-shell::before {
+    content: "🍅 🥑 🧅 🥕 🍋 🌽 🫑 🍊";
+    position: absolute;
+    top: -10px;
+    left: -20px;
+    right: -20px;
+    font-size: 2.5rem;
+    letter-spacing: 3rem;
+    opacity: 0.08;
+    pointer-events: none;
+    z-index: 0;
+    word-spacing: 2rem;
+    line-height: 6rem;
+    height: 100%;
+    word-break: break-all;
+    overflow: hidden;
+  }
+
+  .page-shell > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Colorful blobs in background */
+  .page-bg-blobs {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .page-bg-blobs::before {
+    content: "";
+    position: absolute;
+    top: -15%;
+    left: -10%;
+    width: 55%;
+    height: 50%;
+    background: radial-gradient(circle, hsl(14 80% 50% / 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: blob-float 18s ease-in-out infinite;
+  }
+
+  .page-bg-blobs::after {
+    content: "";
+    position: absolute;
+    bottom: -10%;
+    right: -10%;
+    width: 50%;
+    height: 50%;
+    background: radial-gradient(circle, hsl(42 90% 62% / 0.12) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: blob-float 22s ease-in-out infinite reverse;
+  }
+
+  @keyframes blob-float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -20px) scale(1.05); }
+    66% { transform: translate(-20px, 15px) scale(0.95); }
   }
 
   .card-warm {
@@ -122,20 +182,33 @@
   }
 
   .btn-generate {
-    @apply relative overflow-hidden font-display font-semibold text-lg tracking-wide;
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(14 80% 44%));
+    @apply relative overflow-hidden font-display font-bold text-lg tracking-wide rounded-2xl;
+    background: linear-gradient(135deg, hsl(14 80% 52%), hsl(42 90% 55%));
     color: hsl(var(--primary-foreground));
-    transition: transform 0.15s ease, box-shadow 0.2s ease;
-    box-shadow: 0 4px 14px -3px hsl(var(--primary) / 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 20px -4px hsl(14 80% 50% / 0.45);
+  }
+
+  .btn-generate::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 40%, hsl(0 0% 100% / 0.15) 50%, transparent 60%);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+  }
+
+  .btn-generate:hover:not(:disabled)::before {
+    transform: translateX(100%);
   }
 
   .btn-generate:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px -3px hsl(var(--primary) / 0.5);
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 8px 28px -4px hsl(14 80% 50% / 0.5);
   }
 
   .btn-generate:active:not(:disabled) {
-    transform: translateY(0);
+    transform: translateY(0) scale(0.99);
   }
 
   .input-field {
@@ -149,20 +222,42 @@
   }
 
   .pill-toggle {
-    @apply flex-1 h-12 rounded-xl font-display font-semibold text-base transition-all duration-150;
+    @apply flex-1 h-12 rounded-2xl font-display font-bold text-base transition-all duration-200 border-2;
   }
 
   .pill-toggle-active {
     background: linear-gradient(135deg, hsl(var(--primary)), hsl(14 80% 44%));
     color: hsl(var(--primary-foreground));
-    box-shadow: 0 2px 8px -2px hsl(var(--primary) / 0.35);
+    border-color: transparent;
+    box-shadow: 0 3px 12px -2px hsl(var(--primary) / 0.4);
+    transform: scale(1.02);
   }
 
   .pill-toggle-inactive {
-    @apply bg-muted text-muted-foreground;
+    @apply bg-card text-muted-foreground border-border;
   }
 
   .pill-toggle-inactive:hover {
-    @apply bg-muted/80 text-foreground;
+    @apply border-primary/30 text-foreground;
+    transform: scale(1.01);
+  }
+
+  /* Hero color strip */
+  .hero-strip {
+    height: 6px;
+    background: linear-gradient(90deg,
+      hsl(14 80% 50%),
+      hsl(42 90% 55%),
+      hsl(160 35% 42%),
+      hsl(14 80% 50%)
+    );
+    background-size: 300% 100%;
+    animation: strip-slide 8s linear infinite;
+    border-radius: 999px;
+  }
+
+  @keyframes strip-slide {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
   }
 }
