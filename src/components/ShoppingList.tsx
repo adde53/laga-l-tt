@@ -149,23 +149,11 @@ const ShoppingList = ({ content }: ShoppingListProps) => {
           </button>
         </div>
 
-        {/* Price summary */}
-        <div className="border-t border-border pt-3 space-y-1">
-          {checkedTotal > 0 && (
-            <div className="flex justify-between text-sm font-body">
-              <span className="text-muted-foreground">Avprickat</span>
-              <span className="text-secondary font-semibold line-through">{Math.round(checkedTotal)} kr</span>
-            </div>
-          )}
-          <div className="flex justify-between items-center">
-            <span className="font-display font-bold text-foreground">
-              {checked.size === activeItems.length ? "🎉 Klart!" : "Kvar att handla"}
-            </span>
-            <span className="font-display text-xl font-bold text-primary">
-              ~{Math.round(totalEstimate)} kr
-            </span>
+        {checked.size === activeItems.length && activeItems.length > 0 && (
+          <div className="text-center pt-2 font-display font-bold text-secondary">
+            🎉 Allt avprickat!
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
