@@ -13,6 +13,9 @@ interface SavedRecipe {
   mode: string;
   craving: string | null;
   budget: number | null;
+  cuisine: string | null;
+  selected_days: string[] | null;
+  store: string | null;
   created_at: string;
 }
 
@@ -100,9 +103,11 @@ const SavedRecipes = () => {
                         {recipe.title}
                       </h3>
                     </div>
-                    <div className="flex gap-2.5 text-xs text-muted-foreground font-body">
+                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground font-body">
                       {recipe.budget && <span>💰 {recipe.budget} kr</span>}
                       {recipe.craving && <span>🤤 {recipe.craving}</span>}
+                      {recipe.cuisine && <span>🌍 {recipe.cuisine}</span>}
+                      {recipe.store && <span>🏪 {recipe.store}</span>}
                       <span>
                         {new Date(recipe.created_at).toLocaleDateString("sv-SE")}
                       </span>
