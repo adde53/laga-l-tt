@@ -10,9 +10,12 @@ interface RecipeResultProps {
   craving?: string;
   budget?: string;
   mode?: string;
+  cuisines?: string[];
+  selectedDays?: string[];
+  store?: string;
 }
 
-const RecipeResult = ({ content, craving, budget, mode }: RecipeResultProps) => {
+const RecipeResult = ({ content, craving, budget, mode, cuisines, selectedDays, store }: RecipeResultProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [saved, setSaved] = useState(false);
@@ -52,6 +55,9 @@ const RecipeResult = ({ content, craving, budget, mode }: RecipeResultProps) => 
       mode: mode || "single",
       craving: craving || null,
       budget: budget ? parseInt(budget) : null,
+      cuisine: cuisines?.join(", ") || null,
+      selected_days: selectedDays || null,
+      store: store && store !== "none" ? store : null,
     });
 
     if (error) {

@@ -20,8 +20,11 @@ export type Database = {
           content: string
           craving: string | null
           created_at: string
+          cuisine: string | null
           id: string
           mode: string
+          selected_days: string[] | null
+          store: string | null
           title: string
           user_id: string
         }
@@ -30,8 +33,11 @@ export type Database = {
           content: string
           craving?: string | null
           created_at?: string
+          cuisine?: string | null
           id?: string
           mode?: string
+          selected_days?: string[] | null
+          store?: string | null
           title: string
           user_id: string
         }
@@ -40,8 +46,11 @@ export type Database = {
           content?: string
           craving?: string | null
           created_at?: string
+          cuisine?: string | null
           id?: string
           mode?: string
+          selected_days?: string[] | null
+          store?: string | null
           title?: string
           user_id?: string
         }

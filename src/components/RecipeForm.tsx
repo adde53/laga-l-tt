@@ -5,6 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import PdfUploader from "./PdfUploader";
 import RecipeResult from "./RecipeResult";
 import ShoppingList from "./ShoppingList";
+import CuisineSelector from "./CuisineSelector";
+import DaySelector from "./DaySelector";
 import { ChefHat, Sparkles, CalendarDays, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -25,6 +27,8 @@ const RecipeForm = () => {
   const [budget, setBudget] = useState("100");
   const [store, setStore] = useState("none");
   const [mode, setMode] = useState<"single" | "weekly">("single");
+  const [cuisines, setCuisines] = useState<string[]>([]);
+  const [selectedDays, setSelectedDays] = useState<string[]>(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]);
   const [result, setResult] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingDeals, setIsFetchingDeals] = useState(false);
@@ -76,7 +80,7 @@ const RecipeForm = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ pdfText, craving, budget, mode, store }),
+          body: JSON.stringify({ pdfText, craving, budget, mode, store, cuisines, selectedDays }),
         }
       );
 
@@ -201,8 +205,14 @@ const RecipeForm = () => {
         </div>
       )}
 
+      {/* Cuisine inspiration */}
+      <div className="space-y-2 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+        <label className="section-label">🌍 Matinspiration <span className="text-muted-foreground font-body text-sm font-normal">(valfritt)</span></label>
+        <CuisineSelector selected={cuisines} onChange={setCuisines} />
+      </div>
+
       {/* Mode toggle */}
-      <div className="flex gap-2 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+      <div className="flex gap-2 animate-fade-in-up" style={{ animationDelay: "0.25s" }}>
         <button
           className={`pill-toggle ${mode === "single" ? "pill-toggle-active" : "pill-toggle-inactive"}`}
           onClick={() => setMode("single")}
@@ -220,6 +230,14 @@ const RecipeForm = () => {
           Veckomeny
         </button>
       </div>
+
+      {/* Day selector for weekly mode */}
+      {mode === "weekly" && (
+        <div className="space-y-2 animate-fade-in-up" style={{ animationDelay: "0.28s" }}>
+          <label className="section-label">📅 Vilka dagar?</label>
+          <DaySelector selected={selectedDays} onChange={setSelectedDays} />
+        </div>
+      )}
 
       {/* Generate */}
       <div className="animate-fade-in-up" style={{ animationDelay: "0.25s" }}>
@@ -244,7 +262,7 @@ const RecipeForm = () => {
       {/* Result */}
       {result && (
         <>
-          <RecipeResult content={result} craving={craving} budget={budget} mode={mode} />
+          <RecipeResult content={result} craving={craving} budget={budget} mode={mode} cuisines={cuisines} selectedDays={selectedDays} store={store} />
           {!isLoading && <ShoppingList content={result} />}
         </>
       )}

@@ -9,22 +9,36 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { pdfText, craving, budget, mode, store } = await req.json();
+    const { pdfText, craving, budget, mode, store, cuisines, selectedDays } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    const dayNames: Record<string, string> = {
+      monday: "Måndag", tuesday: "Tisdag", wednesday: "Onsdag", thursday: "Torsdag",
+      friday: "Fredag", saturday: "Lördag", sunday: "Söndag"
+    };
+    const selectedDayNames = (selectedDays && selectedDays.length > 0)
+      ? selectedDays.map((d: string) => dayNames[d] || d)
+      : Object.values(dayNames);
+
+    const cuisineText = cuisines && cuisines.length > 0
+      ? `Matinspiration/kökstyp: ${cuisines.join(", ")}. Anpassa recepten efter dessa kök.`
+      : "";
+
     const systemPrompt = `Du är en glad och kreativ svensk kock som hjälper folk att laga billig och god mat. Du svarar ALLTID på svenska.
 
-${mode === "weekly" ? `Skapa en veckomeny (måndag-söndag) med följande regler:
-- Måndag-torsdag: enkla vardagsrätter
-- Fredag: något extra enkelt (typ tacofredag eller snabb pasta)
-- Lördag-söndag: lite mer festlig mat
+${mode === "weekly" ? `Skapa en veckomeny för DESSA dagar: ${selectedDayNames.join(", ")}. Regler:
+- Vardagar: enkla vardagsrätter
+- Fredag (om inkluderad): något extra enkelt (typ tacofredag eller snabb pasta)
+- Lördag-söndag (om inkluderade): lite mer festlig mat
 - Varje dag ska ha: rättnamn, ingredienser med ungefärliga priser, och enkel tillagning
 - Total veckokostnad ska vara under budgeten` : `Skapa ETT recept med:
 - Rättnamn
 - Ingredienser med ungefärliga priser (SEK)
 - Steg-för-steg tillagning
 - Total ungefärlig kostnad (ska vara under budgeten)`}
+
+${cuisineText}
 
 Formatera svaret i markdown. Använd emojis för att göra det roligt! 🍽️
 
