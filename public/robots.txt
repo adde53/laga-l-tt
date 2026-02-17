@@ -12,3 +12,6 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://www.veckansmatfynd.se/sitemap.xml
+
