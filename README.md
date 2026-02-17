@@ -1,6 +1,6 @@
 # Laga Lätt - Recipe Generator
 
-A smart recipe generator app that helps you create delicious meals based on your preferences, available ingredients, and dietary requirements.
+En smart recept generator app that helps you create delicious meals based on your preferences, available ingredients, and dietary requirements.
 
 ## Getting Started
 
