@@ -29,6 +29,7 @@ const RecipeForm = () => {
   const [mode, setMode] = useState<"single" | "weekly">("single");
   const [cuisines, setCuisines] = useState<string[]>([]);
   const [selectedDays, setSelectedDays] = useState<string[]>(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]);
+  const [portions, setPortions] = useState("4");
   const [result, setResult] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingDeals, setIsFetchingDeals] = useState(false);
@@ -80,7 +81,7 @@ const RecipeForm = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ pdfText, craving, budget, mode, store, cuisines, selectedDays }),
+          body: JSON.stringify({ pdfText, craving, budget, mode, store, cuisines, selectedDays, portions }),
         }
       );
 
@@ -153,7 +154,7 @@ const RecipeForm = () => {
       </div>
 
       {/* Budget + Store row */}
-      <div className="grid grid-cols-2 gap-3 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
+      <div className="grid grid-cols-3 gap-3 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
         <div className="space-y-2">
           <label className="section-label">💰 Budget</label>
           <Input
@@ -163,6 +164,18 @@ const RecipeForm = () => {
             onChange={(e) => setBudget(e.target.value)}
             className="input-field"
             min="20"
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="section-label">👥 Portioner</label>
+          <Input
+            type="number"
+            placeholder="4"
+            value={portions}
+            onChange={(e) => setPortions(e.target.value)}
+            className="input-field"
+            min="1"
+            max="20"
           />
         </div>
         <div className="space-y-2">
