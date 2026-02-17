@@ -10,8 +10,8 @@ serve(async (req) => {
 
   try {
     const { pdfText, craving, budget, mode, store, cuisines, selectedDays, portions } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
 
     const dayNames: Record<string, string> = {
       monday: "Måndag", tuesday: "Tisdag", wednesday: "Onsdag", thursday: "Torsdag",
@@ -61,14 +61,14 @@ ${store && store !== "none" ? `Användaren handlar på ${store.toUpperCase()}. P
 Budget: ${budget} kr
 ${craving ? `Användaren är sugen på: ${craving}` : "Inget speciellt önskemål."}`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: craving ? `Jag är sugen på ${craving} och har ${budget} kr att lägga.${mode === "weekly" ? " Gör en veckomeny!" : " Ge mig ett recept!"}` : `Ge mig ${mode === "weekly" ? "en veckomeny" : "ett recept"} för ${budget} kr.` },
