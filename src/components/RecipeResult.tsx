@@ -22,7 +22,9 @@ const RecipeResult = ({ content, craving, budget, mode, cuisines, selectedDays, 
   const [saving, setSaving] = useState(false);
 
   const htmlContent = useMemo(() => {
-    return content
+    // Remove the Inköpslista section (handled by ShoppingList component)
+    const filtered = content.replace(/##\s*🛒 Inköpslista[^\n]*\n[\s\S]*?(?=\n##|$)/, '');
+    return filtered
       .replace(/^### (.+)$/gm, '<h3 class="font-display text-base font-semibold text-primary mt-4 mb-1">$1</h3>')
       .replace(/^## (.+)$/gm, '<h2 class="font-display text-lg font-bold text-foreground mt-5 mb-2">$1</h2>')
       .replace(/^# (.+)$/gm, '<h1 class="font-display text-xl font-bold text-foreground mt-5 mb-2">$1</h1>')

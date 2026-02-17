@@ -36,10 +36,10 @@ const DaySelector = ({ selected, onChange }: DaySelectorProps) => {
               key={d.value}
               type="button"
               onClick={() => toggle(d.value)}
-              className={`flex-1 py-2 rounded-xl text-xs font-display font-bold transition-all duration-200 border-2 ${
+              className={`flex-1 py-2.5 rounded-xl text-xs font-display font-bold transition-all duration-200 border-2 ${
                 active
-                  ? "bg-primary/15 border-primary/40 text-primary"
-                  : "bg-card border-border text-muted-foreground hover:border-primary/20"
+                  ? "bg-primary text-primary-foreground border-primary shadow-md"
+                  : "bg-muted/40 border-border/50 text-muted-foreground/60 hover:border-border hover:text-muted-foreground"
               }`}
             >
               {d.label}

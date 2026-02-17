@@ -9,7 +9,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { pdfText, craving, budget, mode, store, cuisines, selectedDays } = await req.json();
+    const { pdfText, craving, budget, mode, store, cuisines, selectedDays, portions } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -25,7 +25,11 @@ serve(async (req) => {
       ? `Matinspiration/kökstyp: ${cuisines.join(", ")}. Anpassa recepten efter dessa kök.`
       : "";
 
+    const portionCount = portions || "4";
+
     const systemPrompt = `Du är en glad och kreativ svensk kock som hjälper folk att laga billig och god mat. Du svarar ALLTID på svenska.
+
+Antal portioner: ${portionCount} portioner. Anpassa alla mängder efter detta.
 
 ${mode === "weekly" ? `Skapa en veckomeny för DESSA dagar: ${selectedDayNames.join(", ")}. Regler:
 - Vardagar: enkla vardagsrätter
