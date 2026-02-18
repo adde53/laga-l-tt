@@ -7,7 +7,7 @@ import RecipeResult from "./RecipeResult";
 import ShoppingList from "./ShoppingList";
 import CuisineSelector from "./CuisineSelector";
 import DaySelector from "./DaySelector";
-import { ChefHat, Sparkles, CalendarDays, Download, Loader2, History, X } from "lucide-react";
+import { ChefHat, Sparkles, CalendarDays, Loader2, History, X } from "lucide-react";
 import { toast } from "sonner";
 
 const STORES = [
@@ -61,6 +61,9 @@ const RecipeForm = () => {
   const [dealsLoaded, setDealsLoaded] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [dealsCache, setDealsCache] = useState<Record<string, string>>(() => {
+    try { return JSON.parse(sessionStorage.getItem("dealsCache") || "{}"); } catch { return {}; }
+  });
 
   // Restore pending recipe after login redirect
   useEffect(() => {
@@ -81,9 +84,13 @@ const RecipeForm = () => {
     setHistory(getHistory());
   }, []);
 
-  const handleFetchDeals = async () => {
-    if (store === "none") {
-      toast.error("Välj en butik först!");
+  const fetchDeals = async (storeKey: string) => {
+    if (storeKey === "none") return;
+    // Check cache first
+    if (dealsCache[storeKey]) {
+      setPdfText((prev) => prev ? prev + "\n\n---\n\n" + dealsCache[storeKey] : dealsCache[storeKey]);
+      setDealsLoaded(true);
+      toast.success("Erbjudanden laddade från cache! 🎉");
       return;
     }
     setIsFetchingDeals(true);
@@ -96,13 +103,17 @@ const RecipeForm = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ store }),
+          body: JSON.stringify({ store: storeKey }),
         }
       );
       const data = await resp.json();
       if (data.success && data.text) {
         setPdfText((prev) => prev ? prev + "\n\n---\n\n" + data.text : data.text);
         setDealsLoaded(true);
+        // Cache it
+        const newCache = { ...dealsCache, [storeKey]: data.text };
+        setDealsCache(newCache);
+        sessionStorage.setItem("dealsCache", JSON.stringify(newCache));
         toast.success("Erbjudanden hämtade! 🎉");
       } else {
         toast.error(data.error || "Kunde inte hämta erbjudanden");
@@ -113,6 +124,14 @@ const RecipeForm = () => {
       setIsFetchingDeals(false);
     }
   };
+
+  // Auto-fetch deals when store changes
+  useEffect(() => {
+    if (store !== "none") {
+      setDealsLoaded(false);
+      fetchDeals(store);
+    }
+  }, [store]);
 
   const handleGenerate = async () => {
     setIsLoading(true);
@@ -247,7 +266,7 @@ const RecipeForm = () => {
         </div>
         <div className="space-y-2">
           <label className="section-label">🏪 Butik</label>
-          <Select value={store} onValueChange={(v) => { setStore(v); setDealsLoaded(false); }}>
+          <Select value={store} onValueChange={setStore}>
             <SelectTrigger className="input-field w-full">
               <SelectValue placeholder="Välj butik" />
             </SelectTrigger>
@@ -262,26 +281,14 @@ const RecipeForm = () => {
         </div>
       </div>
 
-      {/* Fetch deals button */}
-      {store !== "none" && (
-        <div className="animate-fade-in-up" style={{ animationDelay: "0.17s" }}>
-          <button
-            onClick={handleFetchDeals}
-            disabled={isFetchingDeals || dealsLoaded}
-            className={`w-full h-10 rounded-xl text-sm font-display font-semibold flex items-center justify-center gap-2 transition-all ${
-              dealsLoaded
-                ? "bg-secondary/15 text-secondary"
-                : "bg-primary/10 text-primary hover:bg-primary/20"
-            } disabled:opacity-60 disabled:cursor-not-allowed`}
-          >
-            {isFetchingDeals ? (
-              <><Loader2 className="w-4 h-4 animate-spin" /> Hämtar erbjudanden...</>
-            ) : dealsLoaded ? (
-              <>✅ Erbjudanden hämtade</>
-            ) : (
-              <><Download className="w-4 h-4" /> Hämta {STORES.find(s => s.value === store)?.label}-erbjudanden automatiskt</>
-            )}
-          </button>
+      {/* Deals loading status */}
+      {store !== "none" && (isFetchingDeals || dealsLoaded) && (
+        <div className="animate-fade-in-up text-sm font-display font-semibold flex items-center gap-2 px-1">
+          {isFetchingDeals ? (
+            <><Loader2 className="w-4 h-4 animate-spin text-primary" /> Hämtar erbjudanden...</>
+          ) : (
+            <span className="text-secondary">✅ Erbjudanden hämtade</span>
+          )}
         </div>
       )}
 
