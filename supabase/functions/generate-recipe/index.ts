@@ -27,6 +27,17 @@ serve(async (req) => {
 
     const portionCount = portions || "4";
 
+    const recipeStructure = `Varje recept MÅSTE följa denna struktur:
+1. **Rättnamn** som rubrik
+2. **Kort beskrivning** (1-2 meningar om rätten)
+3. **👥 ${portionCount} portioner**
+4. **Ingredienser** - lista VARJE ingrediens med:
+   - Mängd
+   - Ungefärligt pris i SEK
+   Exempel: "- 500g kycklingfilé – 45 kr"
+5. **Tillagning** - numrerade steg med tydliga instruktioner
+6. **💰 Totalkostnad: X kr (Y kr/portion)**`;
+
     const systemPrompt = `Du är en glad och kreativ svensk kock som hjälper folk att laga billig och god mat. Du svarar ALLTID på svenska.
 
 Antal portioner: ${portionCount} portioner. Anpassa alla mängder efter detta.
@@ -35,12 +46,12 @@ ${mode === "weekly" ? `Skapa en veckomeny för DESSA dagar: ${selectedDayNames.j
 - Vardagar: enkla vardagsrätter
 - Fredag (om inkluderad): något extra enkelt (typ tacofredag eller snabb pasta)
 - Lördag-söndag (om inkluderade): lite mer festlig mat
-- Varje dag ska ha: rättnamn, ingredienser med ungefärliga priser, och enkel tillagning
-- Total veckokostnad ska vara under budgeten` : `Skapa ETT recept med:
-- Rättnamn
-- Ingredienser med ungefärliga priser (SEK)
-- Steg-för-steg tillagning
-- Total ungefärlig kostnad (ska vara under budgeten)`}
+
+${recipeStructure}
+
+- Avsluta med total veckokostnad: "## 💰 Totalt veckan: X kr (snitt Y kr/dag, Z kr/portion)"` : `Skapa ETT recept.
+
+${recipeStructure}`}
 
 ${cuisineText}
 
@@ -49,14 +60,14 @@ Formatera svaret i markdown. Använd emojis för att göra det roligt! 🍽️
 VIKTIGT: Avsluta ALLTID med dessa två sektioner (använd exakt dessa rubriker):
 
 ## 🛒 Inköpslista
-Lista alla ingredienser som behöver handlas, en per rad med "- " prefix. Inkludera ungefärlig mängd.
+Lista alla ingredienser som behöver handlas, en per rad med "- " prefix. Inkludera mängd och pris.
 
 ## 🏠 Har du troligen hemma?
 Lista vanliga basvaror (salt, peppar, olja, smör, socker, mjöl, kryddor etc.) som receptet behöver men som de flesta har hemma. En per rad med "- " prefix.
 
 ${pdfText ? `Här är erbjudanden från reklamblad att använda:\n${pdfText}` : "Inga reklamblad tillgängliga."}
 
-${store && store !== "none" ? `Användaren handlar på ${store.toUpperCase()}. Prioritera ingredienser och produkter som brukar finnas till bra pris på ${store.toUpperCase()}. Använd din kunskap om butikens sortiment, egna varumärken och typiska erbjudanden.` : "Ingen specifik butik vald, föreslå vanliga billiga ingredienser."}
+${store && store !== "none" ? `Användaren handlar på ${store.toUpperCase()}. Prioritera ingredienser och produkter som brukar finnas till bra pris på ${store.toUpperCase()}.` : "Ingen specifik butik vald, föreslå vanliga billiga ingredienser."}
 
 Budget: ${budget} kr
 ${craving ? `Användaren är sugen på: ${craving}` : "Inget speciellt önskemål."}`;

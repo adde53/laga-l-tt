@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Trash2, ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Trash2, ArrowLeft, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -19,11 +20,22 @@ interface SavedRecipe {
   created_at: string;
 }
 
+const extractCost = (content: string): { total: string | null; perPortion: string | null } => {
+  const m = content.match(/💰\s*(?:Total(?:kostnad)?|Totalt)[^:]*:\s*~?(\d+(?:[,.]\d+)?)\s*kr(?:\s*\(~?(\d+(?:[,.]\d+)?)\s*kr\/portion\))?/i);
+  return m ? { total: m[1], perPortion: m[2] || null } : { total: null, perPortion: null };
+};
+
+const extractPortions = (content: string): string | null => {
+  const m = content.match(/👥\s*(\d+)\s*portioner/i);
+  return m ? m[1] : null;
+};
+
 const SavedRecipes = () => {
   const { user } = useAuth();
   const [recipes, setRecipes] = useState<SavedRecipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (user) fetchRecipes();
@@ -53,10 +65,22 @@ const SavedRecipes = () => {
     }
   };
 
+  const filteredRecipes = useMemo(() => {
+    if (!searchQuery.trim()) return recipes;
+    const q = searchQuery.toLowerCase();
+    return recipes.filter((r) =>
+      r.title.toLowerCase().includes(q) ||
+      r.craving?.toLowerCase().includes(q) ||
+      r.cuisine?.toLowerCase().includes(q) ||
+      r.store?.toLowerCase().includes(q) ||
+      r.content.toLowerCase().includes(q)
+    );
+  }, [recipes, searchQuery]);
+
   return (
     <div className="page-shell min-h-screen">
       <div className="container max-w-xl mx-auto px-5 py-8">
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-4">
           <Link to="/">
             <Button variant="ghost" size="icon" className="rounded-xl">
               <ArrowLeft className="w-5 h-5" />
@@ -66,6 +90,19 @@ const SavedRecipes = () => {
             📚 Sparade recept
           </h1>
         </div>
+
+        {/* Search */}
+        {recipes.length > 0 && (
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Sök recept, ingrediens, kök..."
+              className="input-field pl-9"
+            />
+          </div>
+        )}
 
         {loading ? (
           <div className="text-center py-16 text-muted-foreground font-body">
@@ -87,63 +124,90 @@ const SavedRecipes = () => {
               </button>
             </Link>
           </div>
+        ) : filteredRecipes.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground font-body">
+            <p className="text-2xl mb-2">🔍</p>
+            <p className="text-sm">Inga recept matchade "{searchQuery}"</p>
+          </div>
         ) : (
           <div className="space-y-3">
-            {recipes.map((recipe) => (
-              <div
-                key={recipe.id}
-                className="card-warm p-4 cursor-pointer transition-all"
-                onClick={() => setExpandedId(expandedId === recipe.id ? null : recipe.id)}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-sm">{recipe.mode === "weekly" ? "📅" : "🍽️"}</span>
-                      <h3 className="font-display font-semibold text-foreground text-sm truncate">
-                        {recipe.title}
-                      </h3>
+            {filteredRecipes.map((recipe) => {
+              const cost = extractCost(recipe.content);
+              const portions = extractPortions(recipe.content);
+              return (
+                <div
+                  key={recipe.id}
+                  className="card-warm p-4 cursor-pointer transition-all"
+                  onClick={() => setExpandedId(expandedId === recipe.id ? null : recipe.id)}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm">{recipe.mode === "weekly" ? "📅" : "🍽️"}</span>
+                        <h3 className="font-display font-semibold text-foreground text-sm truncate">
+                          {recipe.title}
+                        </h3>
+                      </div>
+                      {/* Price & portions badges */}
+                      <div className="flex flex-wrap gap-1.5 mb-1">
+                        {cost.total && (
+                          <span className="inline-flex items-center text-xs font-display font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-md">
+                            💰 {cost.total} kr
+                          </span>
+                        )}
+                        {cost.perPortion && (
+                          <span className="inline-flex items-center text-xs font-display bg-muted text-muted-foreground px-2 py-0.5 rounded-md">
+                            {cost.perPortion} kr/portion
+                          </span>
+                        )}
+                        {portions && (
+                          <span className="inline-flex items-center text-xs font-display bg-muted text-muted-foreground px-2 py-0.5 rounded-md">
+                            👥 {portions} port.
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-2 text-xs text-muted-foreground font-body">
+                        {recipe.budget && <span>💰 {recipe.budget} kr budget</span>}
+                        {recipe.craving && <span>🤤 {recipe.craving}</span>}
+                        {recipe.cuisine && <span>🌍 {recipe.cuisine}</span>}
+                        {recipe.store && <span>🏪 {recipe.store}</span>}
+                        <span>
+                          {new Date(recipe.created_at).toLocaleDateString("sv-SE")}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground font-body">
-                      {recipe.budget && <span>💰 {recipe.budget} kr</span>}
-                      {recipe.craving && <span>🤤 {recipe.craving}</span>}
-                      {recipe.cuisine && <span>🌍 {recipe.cuisine}</span>}
-                      {recipe.store && <span>🏪 {recipe.store}</span>}
-                      <span>
-                        {new Date(recipe.created_at).toLocaleDateString("sv-SE")}
-                      </span>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground hover:text-destructive shrink-0 h-8 w-8"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteRecipe(recipe.id);
-                    }}
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-
-                {expandedId === recipe.id && (
-                  <div className="mt-3 pt-3 border-t border-border">
-                    <div
-                      className="text-sm leading-relaxed font-body text-foreground/85 whitespace-pre-wrap"
-                      dangerouslySetInnerHTML={{
-                        __html: recipe.content
-                          .replace(/^### (.+)$/gm, '<h3 class="font-display text-base font-semibold text-primary mt-3 mb-1">$1</h3>')
-                          .replace(/^## (.+)$/gm, '<h2 class="font-display text-lg font-bold text-foreground mt-4 mb-2">$1</h2>')
-                          .replace(/^# (.+)$/gm, '<h1 class="font-display text-xl font-bold text-foreground mt-4 mb-2">$1</h1>')
-                          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                          .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc">$1</li>')
-                          .replace(/\n\n/g, "<br/><br/>"),
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-destructive shrink-0 h-8 w-8"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteRecipe(recipe.id);
                       }}
-                    />
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
                   </div>
-                )}
-              </div>
-            ))}
+
+                  {expandedId === recipe.id && (
+                    <div className="mt-3 pt-3 border-t border-border">
+                      <div
+                        className="text-sm leading-relaxed font-body text-foreground/85 whitespace-pre-wrap"
+                        dangerouslySetInnerHTML={{
+                          __html: recipe.content
+                            .replace(/^### (.+)$/gm, '<h3 class="font-display text-base font-semibold text-primary mt-3 mb-1">$1</h3>')
+                            .replace(/^## (.+)$/gm, '<h2 class="font-display text-lg font-bold text-foreground mt-4 mb-2">$1</h2>')
+                            .replace(/^# (.+)$/gm, '<h1 class="font-display text-xl font-bold text-foreground mt-4 mb-2">$1</h1>')
+                            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                            .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc">$1</li>')
+                            .replace(/\n\n/g, "<br/><br/>"),
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
