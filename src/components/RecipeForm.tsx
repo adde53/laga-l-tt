@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -7,7 +7,7 @@ import RecipeResult from "./RecipeResult";
 import ShoppingList from "./ShoppingList";
 import CuisineSelector from "./CuisineSelector";
 import DaySelector from "./DaySelector";
-import { ChefHat, Sparkles, CalendarDays, Download, Loader2 } from "lucide-react";
+import { ChefHat, Sparkles, CalendarDays, Download, Loader2, History, X } from "lucide-react";
 import { toast } from "sonner";
 
 const STORES = [
@@ -20,6 +20,31 @@ const STORES = [
   { value: "citygross", label: "City Gross" },
   { value: "netto", label: "Netto" },
 ];
+
+interface HistoryEntry {
+  content: string;
+  craving: string;
+  budget: string;
+  mode: string;
+  cuisines: string[];
+  selectedDays: string[];
+  store: string;
+  timestamp: number;
+}
+
+const MAX_HISTORY = 5;
+
+const getHistory = (): HistoryEntry[] => {
+  try {
+    return JSON.parse(localStorage.getItem("recipeHistory") || "[]");
+  } catch { return []; }
+};
+
+const addToHistory = (entry: HistoryEntry) => {
+  const history = getHistory();
+  history.unshift(entry);
+  localStorage.setItem("recipeHistory", JSON.stringify(history.slice(0, MAX_HISTORY)));
+};
 
 const RecipeForm = () => {
   const [pdfText, setPdfText] = useState("");
@@ -34,6 +59,27 @@ const RecipeForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchingDeals, setIsFetchingDeals] = useState(false);
   const [dealsLoaded, setDealsLoaded] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+
+  // Restore pending recipe after login redirect
+  useEffect(() => {
+    const pending = sessionStorage.getItem("pendingRecipe");
+    if (pending) {
+      try {
+        const data = JSON.parse(pending);
+        if (data.content) setResult(data.content);
+        if (data.craving) setCraving(data.craving);
+        if (data.budget) setBudget(data.budget);
+        if (data.mode) setMode(data.mode);
+        if (data.cuisines) setCuisines(data.cuisines);
+        if (data.selectedDays) setSelectedDays(data.selectedDays);
+        if (data.store) setStore(data.store);
+        sessionStorage.removeItem("pendingRecipe");
+      } catch {}
+    }
+    setHistory(getHistory());
+  }, []);
 
   const handleFetchDeals = async () => {
     if (store === "none") {
@@ -122,6 +168,16 @@ const RecipeForm = () => {
           }
         }
       }
+
+      // Save to history
+      if (accumulated.length > 50) {
+        const entry: HistoryEntry = {
+          content: accumulated, craving, budget, mode, cuisines, selectedDays, store,
+          timestamp: Date.now()
+        };
+        addToHistory(entry);
+        setHistory(getHistory());
+      }
     } catch (e) {
       console.error(e);
       setResult(
@@ -130,6 +186,17 @@ const RecipeForm = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const loadFromHistory = (entry: HistoryEntry) => {
+    setResult(entry.content);
+    setCraving(entry.craving);
+    setBudget(entry.budget);
+    setMode(entry.mode as "single" | "weekly");
+    setCuisines(entry.cuisines);
+    setSelectedDays(entry.selectedDays);
+    setStore(entry.store);
+    setShowHistory(false);
   };
 
   return (
@@ -153,7 +220,7 @@ const RecipeForm = () => {
         />
       </div>
 
-      {/* Budget + Store row */}
+      {/* Budget + Portions + Store row */}
       <div className="grid grid-cols-3 gap-3 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
         <div className="space-y-2">
           <label className="section-label">💰 Budget</label>
@@ -252,10 +319,10 @@ const RecipeForm = () => {
         </div>
       )}
 
-      {/* Generate */}
-      <div className="animate-fade-in-up" style={{ animationDelay: "0.25s" }}>
+      {/* Generate + History row */}
+      <div className="flex gap-2 animate-fade-in-up" style={{ animationDelay: "0.25s" }}>
         <button
-          className="btn-generate w-full h-14 rounded-xl text-lg disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="btn-generate flex-1 h-14 rounded-xl text-lg disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           onClick={handleGenerate}
           disabled={isLoading}
         >
@@ -270,7 +337,52 @@ const RecipeForm = () => {
             </>
           )}
         </button>
+        {history.length > 0 && (
+          <button
+            onClick={() => setShowHistory(!showHistory)}
+            className={`h-14 w-14 rounded-xl flex items-center justify-center transition-all ${
+              showHistory ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary hover:bg-primary/20"
+            }`}
+            title="Tidigare förslag"
+          >
+            <History className="w-5 h-5" />
+          </button>
+        )}
       </div>
+
+      {/* History panel */}
+      {showHistory && history.length > 0 && (
+        <div className="card-warm p-4 space-y-2 animate-fade-in-up">
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="font-display text-sm font-bold text-foreground flex items-center gap-1.5">
+              <History className="w-4 h-4 text-primary" /> Senaste förslag
+            </h3>
+            <button onClick={() => setShowHistory(false)} className="p-1 rounded-lg hover:bg-muted transition-colors">
+              <X className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
+          {history.map((entry, i) => {
+            const title = entry.content.match(/^#+\s*(.+)$/m)?.[1]?.replace(/[*_#]/g, "").trim() || "Recept";
+            const date = new Date(entry.timestamp).toLocaleDateString("sv-SE", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+            return (
+              <button
+                key={i}
+                onClick={() => loadFromHistory(entry)}
+                className="w-full text-left p-3 rounded-xl hover:bg-muted/50 transition-all flex items-center justify-between gap-2"
+              >
+                <div className="min-w-0">
+                  <p className="font-display text-sm font-semibold text-foreground truncate">
+                    {entry.mode === "weekly" ? "📅" : "🍽️"} {title}
+                  </p>
+                  <p className="text-xs text-muted-foreground font-body">
+                    {entry.budget} kr · {entry.craving || "Ingen önskan"} · {date}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Result */}
       {result && (

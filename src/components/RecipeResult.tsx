@@ -55,6 +55,16 @@ const markdownToHtml = (text: string): string => {
     .replace(/\n\n/g, '<br/><br/>');
 };
 
+/** Extract cost info from recipe text */
+const extractCostInfo = (text: string): { total: string | null; perPortion: string | null } => {
+  // Match "Totalkostnad: 85 kr (21 kr/portion)" or "💰 Totalt: 85 kr"
+  const costMatch = text.match(/💰\s*(?:Total(?:kostnad)?|Totalt)[^:]*:\s*~?(\d+(?:[,.]\d+)?)\s*kr(?:\s*\(~?(\d+(?:[,.]\d+)?)\s*kr\/portion\))?/i);
+  if (costMatch) {
+    return { total: costMatch[1], perPortion: costMatch[2] || null };
+  }
+  return { total: null, perPortion: null };
+};
+
 const SaveButton = ({ onSave, saved, saving }: { onSave: () => void; saved: boolean; saving: boolean }) => (
   <button
     onClick={onSave}
@@ -68,6 +78,16 @@ const SaveButton = ({ onSave, saved, saving }: { onSave: () => void; saved: bool
     {saved ? <><Check className="w-3.5 h-3.5" /> Sparat</> : <><Bookmark className="w-3.5 h-3.5" /> Spara</>}
   </button>
 );
+
+const CostBadge = ({ total, perPortion }: { total: string | null; perPortion: string | null }) => {
+  if (!total) return null;
+  return (
+    <div className="flex items-center gap-2 text-xs font-display">
+      <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-md font-semibold">💰 {total} kr</span>
+      {perPortion && <span className="bg-muted text-muted-foreground px-2 py-0.5 rounded-md">{perPortion} kr/portion</span>}
+    </div>
+  );
+};
 
 const RecipeResult = ({ content, craving, budget, mode, cuisines, selectedDays, store }: RecipeResultProps) => {
   const { user } = useAuth();
@@ -85,10 +105,16 @@ const RecipeResult = ({ content, craving, budget, mode, cuisines, selectedDays, 
     return markdownToHtml(withoutShoppingList);
   }, [content]);
 
+  const overallCost = useMemo(() => extractCostInfo(content), [content]);
+
   const saveRecipe = async (title: string, recipeContent: string) => {
     if (!user) {
+      // Store pending save in sessionStorage before redirecting
+      sessionStorage.setItem("pendingRecipe", JSON.stringify({
+        content, craving, budget, mode, cuisines, selectedDays, store
+      }));
       toast("Logga in för att spara recept! 🔑");
-      navigate("/auth");
+      navigate("/auth?redirect=/");
       return false;
     }
     const { error } = await supabase.from("saved_recipes").insert({
@@ -122,24 +148,25 @@ const RecipeResult = ({ content, craving, budget, mode, cuisines, selectedDays, 
     setSavingDay(null);
   };
 
-  // For single recipes or non-parseable weekly menus, show as before
+  // For single recipes or non-parseable weekly menus
   if (!isWeekly || dayRecipes.length === 0) {
     return (
       <div className="animate-fade-in-up">
         <div className="card-warm p-5 md:p-7">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <h2 className="font-display text-xl font-bold text-foreground flex items-center gap-2">
               <span className="text-2xl">🍽️</span> Ditt recept
             </h2>
             <SaveButton onSave={handleSaveAll} saved={savedAll} saving={savingAll} />
           </div>
-          <div className="text-sm leading-relaxed font-body text-foreground/85" dangerouslySetInnerHTML={{ __html: filteredContent }} />
+          <CostBadge total={overallCost.total} perPortion={overallCost.perPortion} />
+          <div className="text-sm leading-relaxed font-body text-foreground/85 mt-3" dangerouslySetInnerHTML={{ __html: filteredContent }} />
         </div>
       </div>
     );
   }
 
-  // Weekly menu: show each day as a separate card with its own save button
+  // Weekly menu
   return (
     <div className="animate-fade-in-up space-y-4">
       <div className="flex items-center justify-between">
@@ -148,20 +175,25 @@ const RecipeResult = ({ content, craving, budget, mode, cuisines, selectedDays, 
         </h2>
         <SaveButton onSave={handleSaveAll} saved={savedAll} saving={savingAll} />
       </div>
+      <CostBadge total={overallCost.total} perPortion={overallCost.perPortion} />
 
-      {dayRecipes.map((recipe, i) => (
-        <div key={i} className="card-warm p-5 md:p-6">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-display text-base font-bold text-foreground">{recipe.title}</h3>
-            <SaveButton
-              onSave={() => handleSaveDay(i, recipe)}
-              saved={savedDays.has(i)}
-              saving={savingDay === i}
-            />
+      {dayRecipes.map((recipe, i) => {
+        const dayCost = extractCostInfo(recipe.content);
+        return (
+          <div key={i} className="card-warm p-5 md:p-6">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-display text-base font-bold text-foreground">{recipe.title}</h3>
+              <SaveButton
+                onSave={() => handleSaveDay(i, recipe)}
+                saved={savedDays.has(i)}
+                saving={savingDay === i}
+              />
+            </div>
+            <CostBadge total={dayCost.total} perPortion={dayCost.perPortion} />
+            <div className="text-sm leading-relaxed font-body text-foreground/85 mt-2" dangerouslySetInnerHTML={{ __html: markdownToHtml(recipe.content) }} />
           </div>
-          <div className="text-sm leading-relaxed font-body text-foreground/85" dangerouslySetInnerHTML={{ __html: markdownToHtml(recipe.content) }} />
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
