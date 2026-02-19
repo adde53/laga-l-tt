@@ -219,56 +219,91 @@ const RecipeForm = () => {
           setResult(accumulated);
         }
 
-        const resp = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-recipe`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-            },
-            body: JSON.stringify({ 
-              pdfText, craving, budget, mode, store, cuisines, 
-              selectedDays: mode === "weekly" ? aiDays : selectedDays, 
-              portions 
-            }),
-          }
-        );
-
-        if (!resp.ok || !resp.body) {
-          const errData = await resp.json().catch(() => ({}));
-          throw new Error(errData.error || "Något gick fel!");
-        }
-
-        const reader = resp.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-
-          let newlineIndex: number;
-          while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
-            let line = buffer.slice(0, newlineIndex);
-            buffer = buffer.slice(newlineIndex + 1);
-            if (line.endsWith("\r")) line = line.slice(0, -1);
-            if (line.startsWith(":") || line.trim() === "") continue;
-            if (!line.startsWith("data: ")) continue;
-            const jsonStr = line.slice(6).trim();
-            if (jsonStr === "[DONE]") break;
-            try {
-              const parsed = JSON.parse(jsonStr);
-              const content = parsed.choices?.[0]?.delta?.content;
-              if (content) {
-                accumulated += content;
-                setResult(accumulated);
-              }
-            } catch {
-              buffer = line + "\n" + buffer;
-              break;
+        let aiSucceeded = false;
+        try {
+          const resp = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-recipe`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              },
+              body: JSON.stringify({ 
+                pdfText, craving, budget, mode, store, cuisines, 
+                selectedDays: mode === "weekly" ? aiDays : selectedDays, 
+                portions 
+              }),
             }
+          );
+
+          if (!resp.ok || !resp.body) {
+            const errData = await resp.json().catch(() => ({}));
+            throw new Error(errData.error || "AI-fel");
+          }
+
+          const reader = resp.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = "";
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+
+            let newlineIndex: number;
+            while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
+              let line = buffer.slice(0, newlineIndex);
+              buffer = buffer.slice(newlineIndex + 1);
+              if (line.endsWith("\r")) line = line.slice(0, -1);
+              if (line.startsWith(":") || line.trim() === "") continue;
+              if (!line.startsWith("data: ")) continue;
+              const jsonStr = line.slice(6).trim();
+              if (jsonStr === "[DONE]") break;
+              try {
+                const parsed = JSON.parse(jsonStr);
+                const content = parsed.choices?.[0]?.delta?.content;
+                if (content) {
+                  accumulated += content;
+                  setResult(accumulated);
+                }
+              } catch {
+                buffer = line + "\n" + buffer;
+                break;
+              }
+            }
+          }
+          aiSucceeded = true;
+        } catch (aiError) {
+          console.error("AI failed, falling back to web recipes:", aiError);
+          toast.error("AI krånglar – hämtar recept från webben istället! 🔄");
+
+          // Remove any partial AI header
+          if (accumulated.includes("# 🤖 AI-genererade recept")) {
+            accumulated = accumulated.replace("# 🤖 AI-genererade recept\n\n", "");
+          }
+
+          // Fallback: fetch all remaining days from web
+          const fallbackDays = mode === "single" ? ["single"] : aiDays;
+          const fallbackResults = await Promise.all(
+            fallbackDays.map(async (day) => ({
+              day,
+              recipe: await fetchWebRecipe(day === "single" ? "" : day),
+            }))
+          );
+
+          const fallbackFound = fallbackResults.filter(r => r.recipe);
+          if (fallbackFound.length > 0) {
+            if (!accumulated.includes("📖")) {
+              accumulated += "# 📖 Recept från webben\n\n";
+            }
+            for (const { recipe } of fallbackFound) {
+              accumulated += recipe + "\n\n---\n\n";
+            }
+            setResult(accumulated);
+            toast.success(`📖 ${fallbackFound.length} recept hämtade från webben!`);
+          } else {
+            throw new Error("Kunde varken nå AI eller hitta recept på webben. Försök igen!");
           }
         }
       }
