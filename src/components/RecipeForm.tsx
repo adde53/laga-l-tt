@@ -133,57 +133,142 @@ const RecipeForm = () => {
     }
   }, [store]);
 
-  const handleGenerate = async () => {
-    setIsLoading(true);
-    setResult("");
+  const dayNames: Record<string, string> = {
+    monday: "Måndag", tuesday: "Tisdag", wednesday: "Onsdag", thursday: "Torsdag",
+    friday: "Fredag", saturday: "Lördag", sunday: "Söndag"
+  };
 
+  const fetchWebRecipe = async (dayKey: string): Promise<string | null> => {
     try {
       const resp = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-recipe`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fetch-web-recipe`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ pdfText, craving, budget, mode, store, cuisines, selectedDays, portions }),
+          body: JSON.stringify({
+            craving,
+            cuisines,
+            budget: Math.round(Number(budget) / selectedDays.length).toString(),
+            portions,
+            dayName: dayNames[dayKey] || dayKey,
+            pdfText,
+          }),
         }
       );
+      const data = await resp.json();
+      if (data.success && data.recipe) {
+        return data.recipe;
+      }
+      return null;
+    } catch (e) {
+      console.error("Web recipe fetch failed for", dayKey, e);
+      return null;
+    }
+  };
 
-      if (!resp.ok || !resp.body) {
-        const errData = await resp.json().catch(() => ({}));
-        throw new Error(errData.error || "Något gick fel!");
+  const handleGenerate = async () => {
+    setIsLoading(true);
+    setResult("");
+
+    try {
+      // For weekly mode: randomly pick ~half the days for web-scraped recipes
+      let webRecipes: Record<string, string> = {};
+      if (mode === "weekly" && selectedDays.length >= 3) {
+        const shuffled = [...selectedDays].sort(() => Math.random() - 0.5);
+        const webDays = shuffled.slice(0, Math.max(1, Math.floor(selectedDays.length / 2)));
+        
+        toast.info(`🔍 Söker riktiga recept för ${webDays.map(d => dayNames[d]).join(", ")}...`);
+        
+        const webResults = await Promise.all(
+          webDays.map(async (day) => ({ day, recipe: await fetchWebRecipe(day) }))
+        );
+        
+        for (const { day, recipe } of webResults) {
+          if (recipe) webRecipes[day] = recipe;
+        }
+
+        if (Object.keys(webRecipes).length > 0) {
+          toast.success(`📖 ${Object.keys(webRecipes).length} riktiga recept hittade!`);
+        }
       }
 
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
+      // Determine which days the AI should generate for
+      const aiDays = mode === "weekly" 
+        ? selectedDays.filter(d => !webRecipes[d])
+        : selectedDays;
+
+      // Show web recipes first
       let accumulated = "";
+      if (Object.keys(webRecipes).length > 0) {
+        accumulated = "# 📖 Riktiga recept från webben\n\n";
+        for (const day of selectedDays) {
+          if (webRecipes[day]) {
+            accumulated += webRecipes[day] + "\n\n---\n\n";
+          }
+        }
+        setResult(accumulated);
+      }
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
+      // If there are AI days to generate (or single mode)
+      if (aiDays.length > 0 || mode === "single") {
+        if (Object.keys(webRecipes).length > 0) {
+          accumulated += "# 🤖 AI-genererade recept\n\n";
+          setResult(accumulated);
+        }
 
-        let newlineIndex: number;
-        while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
-          let line = buffer.slice(0, newlineIndex);
-          buffer = buffer.slice(newlineIndex + 1);
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (line.startsWith(":") || line.trim() === "") continue;
-          if (!line.startsWith("data: ")) continue;
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") break;
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              accumulated += content;
-              setResult(accumulated);
+        const resp = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-recipe`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({ 
+              pdfText, craving, budget, mode, store, cuisines, 
+              selectedDays: mode === "weekly" ? aiDays : selectedDays, 
+              portions 
+            }),
+          }
+        );
+
+        if (!resp.ok || !resp.body) {
+          const errData = await resp.json().catch(() => ({}));
+          throw new Error(errData.error || "Något gick fel!");
+        }
+
+        const reader = resp.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          let newlineIndex: number;
+          while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
+            let line = buffer.slice(0, newlineIndex);
+            buffer = buffer.slice(newlineIndex + 1);
+            if (line.endsWith("\r")) line = line.slice(0, -1);
+            if (line.startsWith(":") || line.trim() === "") continue;
+            if (!line.startsWith("data: ")) continue;
+            const jsonStr = line.slice(6).trim();
+            if (jsonStr === "[DONE]") break;
+            try {
+              const parsed = JSON.parse(jsonStr);
+              const content = parsed.choices?.[0]?.delta?.content;
+              if (content) {
+                accumulated += content;
+                setResult(accumulated);
+              }
+            } catch {
+              buffer = line + "\n" + buffer;
+              break;
             }
-          } catch {
-            buffer = line + "\n" + buffer;
-            break;
           }
         }
       }

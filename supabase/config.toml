@@ -2,3 +2,6 @@ project_id = "lyjgjuhshxbfolloscyl"
 
 [functions.generate-recipe]
 verify_jwt = false
+
+[functions.fetch-web-recipe]
+verify_jwt = false
