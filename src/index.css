@@ -221,6 +221,13 @@
     @apply font-display text-base font-semibold text-foreground flex items-center gap-2;
   }
 
+  .feature-chip {
+    @apply flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl text-center;
+    @apply text-xs font-display font-semibold text-muted-foreground;
+    background: hsl(var(--card) / 0.7);
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+
   .pill-toggle {
     @apply flex-1 h-12 rounded-2xl font-display font-bold text-base transition-all duration-200 border-2;
   }
