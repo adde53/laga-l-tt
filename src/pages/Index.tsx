@@ -2,7 +2,17 @@ import RecipeForm from "@/components/RecipeForm";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { BookOpen, LogIn, LogOut, Sparkles, ShoppingCart, Utensils, TrendingDown, Clock, ChefHat } from "lucide-react";
+import { BookOpen, LogIn, LogOut } from "lucide-react";
+import {
+  PotIllustration,
+  CarrotIllustration,
+  PanIllustration,
+  ShoppingBagIllustration,
+  MagicWandIllustration,
+  CoinIllustration,
+  QuickTimeIllustration,
+  ChefHatIllustration,
+} from "@/components/illustrations/FoodIllustrations";
 
 const Index = () => {
   const { user, signOut } = useAuth();
@@ -38,45 +48,45 @@ const Index = () => {
         </div>
       </nav>
 
-      {/* Hero – wider on desktop */}
+      {/* Hero */}
       <header className="container max-w-5xl mx-auto px-5 pt-10 pb-4 md:pt-16 md:pb-8">
         <div className="md:grid md:grid-cols-2 md:gap-12 md:items-center">
           {/* Left: text */}
           <div className="text-center md:text-left space-y-5 animate-fade-in-up">
-            <div className="inline-flex items-center gap-3 text-5xl md:text-6xl select-none" aria-hidden="true">
-              <span className="animate-bounce" style={{ animationDelay: "0s", animationDuration: "2.5s" }}>🥘</span>
-              <span className="animate-bounce" style={{ animationDelay: "0.3s", animationDuration: "2.5s" }}>🥦</span>
-              <span className="animate-bounce" style={{ animationDelay: "0.6s", animationDuration: "2.5s" }}>🍳</span>
+            <div className="inline-flex items-center gap-4 select-none" aria-hidden="true">
+              <PotIllustration size={52} className="text-primary hero-float" style={{ animationDelay: "0s" }} />
+              <CarrotIllustration size={44} className="text-accent-foreground hero-float" style={{ animationDelay: "0.4s" }} />
+              <PanIllustration size={48} className="text-secondary hero-float" style={{ animationDelay: "0.8s" }} />
             </div>
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight">
               Veckans<span className="text-primary">MatFynd</span>
             </h1>
             <div className="hero-strip max-w-xs mx-auto md:mx-0" aria-hidden="true" />
             <p className="font-body text-base md:text-lg text-muted-foreground max-w-md mx-auto md:mx-0 leading-relaxed">
-              Berätta vad du är sugen på – få recept som passar plånboken. 
+              Berätta vad du är sugen på – få recept som passar plånboken.
               Vi hittar veckans bästa erbjudanden och skapar din meny automatiskt.
             </p>
           </div>
 
-          {/* Right: feature cards – visible on desktop */}
+          {/* Right: feature cards – desktop */}
           <div className="hidden md:grid grid-cols-2 gap-4 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
             <div className="feature-card-desktop">
-              <ShoppingCart className="w-6 h-6 text-primary" />
+              <ShoppingBagIllustration size={36} className="text-primary" />
               <h3 className="font-display font-bold text-sm text-foreground">Veckans erbjudanden</h3>
               <p className="text-xs text-muted-foreground">Automatisk hämtning från ICA, Coop, Willys & fler</p>
             </div>
             <div className="feature-card-desktop">
-              <Sparkles className="w-6 h-6 text-accent-foreground" />
+              <MagicWandIllustration size={36} className="text-accent-foreground" />
               <h3 className="font-display font-bold text-sm text-foreground">AI + riktiga recept</h3>
               <p className="text-xs text-muted-foreground">Mix av webrecept och AI-genererade förslag</p>
             </div>
             <div className="feature-card-desktop">
-              <TrendingDown className="w-6 h-6 text-secondary" />
+              <CoinIllustration size={36} className="text-secondary" />
               <h3 className="font-display font-bold text-sm text-foreground">Budgetanpassat</h3>
               <p className="text-xs text-muted-foreground">Ange din budget – vi anpassar recepten</p>
             </div>
             <div className="feature-card-desktop">
-              <Clock className="w-6 h-6 text-primary" />
+              <QuickTimeIllustration size={36} className="text-primary" />
               <h3 className="font-display font-bold text-sm text-foreground">Veckomeny på minuter</h3>
               <p className="text-xs text-muted-foreground">Komplett veckoplanering med inköpslista</p>
             </div>
@@ -84,30 +94,30 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Feature chips – mobile only */}
+      {/* Feature chips – mobile */}
       <section className="md:hidden container max-w-xl mx-auto px-5 pt-2 pb-2" aria-label="Funktioner">
         <div className="grid grid-cols-3 gap-3">
           <div className="feature-chip">
-            <ShoppingCart className="w-4 h-4 text-primary" />
+            <ShoppingBagIllustration size={24} className="text-primary" />
             <span>Erbjudanden</span>
           </div>
           <div className="feature-chip">
-            <Sparkles className="w-4 h-4 text-accent-foreground" />
+            <MagicWandIllustration size={24} className="text-accent-foreground" />
             <span>AI + riktiga recept</span>
           </div>
           <div className="feature-chip">
-            <Utensils className="w-4 h-4 text-secondary" />
+            <PotIllustration size={24} className="text-secondary" />
             <span>Veckomeny</span>
           </div>
         </div>
       </section>
 
-      {/* Main – centered card on desktop */}
+      {/* Main */}
       <main className="container max-w-5xl mx-auto px-5 py-6 md:py-10">
         <div className="md:max-w-2xl md:mx-auto lg:max-w-3xl">
           <div className="card-warm p-5 md:p-8 lg:p-10">
-            <div className="flex items-center gap-2 mb-6">
-              <ChefHat className="w-5 h-5 text-primary" />
+            <div className="flex items-center gap-2.5 mb-6">
+              <ChefHatIllustration size={28} className="text-primary" />
               <h2 className="font-display text-lg font-bold text-foreground">Skapa ditt recept</h2>
             </div>
             <RecipeForm />
@@ -126,28 +136,28 @@ const Index = () => {
             <article>
               <h3 className="font-display text-sm font-semibold text-foreground/50 mb-1">Spara pengar på maten</h3>
               <p>
-                VeckansMatFynd hjälper dig att planera veckans måltider baserat på aktuella erbjudanden från ICA, Coop, Willys, 
+                VeckansMatFynd hjälper dig att planera veckans måltider baserat på aktuella erbjudanden från ICA, Coop, Willys,
                 Hemköp och Lidl. Få recept som maximerar dina besparingar utan att tumma på smaken.
               </p>
             </article>
             <article>
               <h3 className="font-display text-sm font-semibold text-foreground/50 mb-1">Riktiga recept & AI-genererade</h3>
               <p>
-                Vi blandar noggrant utvalda recept från populära svenska matsidor som ICA Recept, Köket.se och Arla 
+                Vi blandar noggrant utvalda recept från populära svenska matsidor som ICA Recept, Köket.se och Arla
                 med AI-genererade recept anpassade efter din budget och dina önskemål.
               </p>
             </article>
             <article>
               <h3 className="font-display text-sm font-semibold text-foreground/50 mb-1">Perfekt för studenter & familjer</h3>
               <p>
-                Oavsett om du är student med tight budget eller en familj som vill äta gott utan att det kostar skjortan – 
+                Oavsett om du är student med tight budget eller en familj som vill äta gott utan att det kostar skjortan –
                 VeckansMatFynd skapar recept anpassade efter just din situation.
               </p>
             </article>
             <article>
               <h3 className="font-display text-sm font-semibold text-foreground/50 mb-1">Skapa veckomeny på minuter</h3>
               <p>
-                Välj vilka dagar du vill ha recept för, ange din totala matbudget och vilken typ av mat du gillar. 
+                Välj vilka dagar du vill ha recept för, ange din totala matbudget och vilken typ av mat du gillar.
                 VeckansMatFynd genererar en komplett veckomeny med inköpslista på bara några sekunder.
               </p>
             </article>
@@ -157,7 +167,12 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="text-center py-8 text-muted-foreground text-xs font-body tracking-wide">
-        <p>VeckansMatFynd 2026 · Gjord med ❤️ och hunger</p>
+        <div className="flex items-center justify-center gap-3 mb-2">
+          <PotIllustration size={16} className="text-primary opacity-40" />
+          <CarrotIllustration size={14} className="text-accent-foreground opacity-30" />
+          <PanIllustration size={16} className="text-secondary opacity-35" />
+        </div>
+        <p>VeckansMatFynd 2026 · Gjord med kärlek och hunger</p>
         <p className="mt-1 text-muted-foreground/50">
           Billiga recept · Veckomeny · Budgetmat · Veckans erbjudanden
         </p>
