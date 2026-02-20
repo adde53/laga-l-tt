@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import PdfUploader from "./PdfUploader";
 import RecipeResult from "./RecipeResult";
 import ShoppingList from "./ShoppingList";
 import CuisineSelector from "./CuisineSelector";
@@ -47,7 +46,7 @@ const addToHistory = (entry: HistoryEntry) => {
 };
 
 const RecipeForm = () => {
-  const [pdfText, setPdfText] = useState("");
+  const [dealsText, setDealsText] = useState("");
   const [craving, setCraving] = useState("");
   const [budget, setBudget] = useState("100");
   const [store, setStore] = useState("none");
@@ -88,7 +87,7 @@ const RecipeForm = () => {
     if (storeKey === "none") return;
     // Check cache first
     if (dealsCache[storeKey]) {
-      setPdfText((prev) => prev ? prev + "\n\n---\n\n" + dealsCache[storeKey] : dealsCache[storeKey]);
+      setDealsText((prev) => prev ? prev + "\n\n---\n\n" + dealsCache[storeKey] : dealsCache[storeKey]);
       setDealsLoaded(true);
       toast.success("Erbjudanden laddade från cache! 🎉");
       return;
@@ -108,7 +107,7 @@ const RecipeForm = () => {
       );
       const data = await resp.json();
       if (data.success && data.text) {
-        setPdfText((prev) => prev ? prev + "\n\n---\n\n" + data.text : data.text);
+        setDealsText((prev) => prev ? prev + "\n\n---\n\n" + data.text : data.text);
         setDealsLoaded(true);
         // Cache it
         const newCache = { ...dealsCache, [storeKey]: data.text };
@@ -154,7 +153,7 @@ const RecipeForm = () => {
             budget: Math.round(Number(budget) / selectedDays.length).toString(),
             portions,
             dayName: dayNames[dayKey] || dayKey,
-            pdfText,
+            pdfText: dealsText,
           }),
         }
       );
@@ -230,7 +229,7 @@ const RecipeForm = () => {
                 Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
               },
               body: JSON.stringify({ 
-                pdfText, craving, budget, mode, store, cuisines, 
+                pdfText: dealsText, craving, budget, mode, store, cuisines, 
                 selectedDays: mode === "weekly" ? aiDays : selectedDays, 
                 portions 
               }),
@@ -340,14 +339,6 @@ const RecipeForm = () => {
 
   return (
     <div className="space-y-6">
-      {/* PDF Upload */}
-      <div className="space-y-2 animate-fade-in-up" style={{ animationDelay: "0.05s" }}>
-        <label className="section-label">
-          📰 Reklamblad <span className="text-muted-foreground font-body text-sm font-normal">(valfritt)</span>
-        </label>
-        <PdfUploader onTextExtracted={setPdfText} />
-      </div>
-
       {/* Craving */}
       <div className="space-y-2 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
         <label className="section-label">🤤 Vad är du sugen på?</label>
