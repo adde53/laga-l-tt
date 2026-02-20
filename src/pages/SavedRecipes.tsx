@@ -30,6 +30,18 @@ const extractPortions = (content: string): string | null => {
   return m ? m[1] : null;
 };
 
+const markdownToHtml = (text: string): string => {
+  return text
+    .replace(/^### (.+)$/gm, '<h3 class="text-sm font-semibold text-primary mt-4 mb-1.5">$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2 class="text-base font-bold text-foreground mt-5 mb-2">$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1 class="text-lg font-bold text-foreground mt-5 mb-2">$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-foreground">$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc text-foreground/80 leading-relaxed text-sm">$1</li>')
+    .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 list-decimal text-foreground/80 leading-relaxed text-sm">$2</li>')
+    .replace(/\n\n/g, '<div class="h-2"></div>');
+};
+
 const SavedRecipes = () => {
   const { user } = useAuth();
   const [recipes, setRecipes] = useState<SavedRecipe[]>([]);
@@ -190,18 +202,34 @@ const SavedRecipes = () => {
                   </div>
 
                   {expandedId === recipe.id && (
-                    <div className="mt-3 pt-3 border-t border-border">
+                    <div className="mt-3 pt-3 border-t border-border space-y-3">
+                      {/* Summary badges */}
+                      <div className="flex flex-wrap gap-2">
+                        {cost.total && (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold bg-primary/10 text-primary px-2.5 py-1 rounded-lg">
+                            💰 Totalt: {cost.total} kr
+                          </span>
+                        )}
+                        {cost.perPortion && (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold bg-secondary/10 text-secondary px-2.5 py-1 rounded-lg">
+                            🍽️ {cost.perPortion} kr/portion
+                          </span>
+                        )}
+                        {portions && (
+                          <span className="inline-flex items-center gap-1 text-xs font-medium bg-muted text-muted-foreground px-2.5 py-1 rounded-lg">
+                            👥 {portions} portioner
+                          </span>
+                        )}
+                        {recipe.store && (
+                          <span className="inline-flex items-center gap-1 text-xs font-medium bg-muted text-muted-foreground px-2.5 py-1 rounded-lg">
+                            🏪 {recipe.store}
+                          </span>
+                        )}
+                      </div>
+                      {/* Recipe content */}
                       <div
-                        className="text-sm leading-relaxed font-body text-foreground/85 whitespace-pre-wrap"
-                        dangerouslySetInnerHTML={{
-                          __html: recipe.content
-                            .replace(/^### (.+)$/gm, '<h3 class="font-display text-base font-semibold text-primary mt-3 mb-1">$1</h3>')
-                            .replace(/^## (.+)$/gm, '<h2 class="font-display text-lg font-bold text-foreground mt-4 mb-2">$1</h2>')
-                            .replace(/^# (.+)$/gm, '<h1 class="font-display text-xl font-bold text-foreground mt-4 mb-2">$1</h1>')
-                            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                            .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc">$1</li>')
-                            .replace(/\n\n/g, "<br/><br/>"),
-                        }}
+                        className="font-body text-foreground/85 leading-relaxed"
+                        dangerouslySetInnerHTML={{ __html: markdownToHtml(recipe.content) }}
                       />
                     </div>
                   )}
