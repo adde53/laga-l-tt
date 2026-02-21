@@ -1,4 +1,4 @@
-import RecipeForm from "@/components/RecipeForm";
+import RecipeForm from "@/components/RecipeForm"; // redesigned
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
