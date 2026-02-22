@@ -84,10 +84,17 @@ const Index = () => {
                 <ChefHatIllustration size={22} className="text-primary-foreground" />
                 Skapa recept nu
               </button>
-              <button onClick={scrollToForm} className="btn-hero-secondary">
-                <ArrowDown className="w-4 h-4" />
-                Se hur det funkar
-              </button>
+              {user ? (
+                <Link to="/saved" className="btn-hero-secondary">
+                  <BookOpen className="w-4 h-4" />
+                  Mina sparade recept
+                </Link>
+              ) : (
+                <Link to="/auth" className="btn-hero-secondary">
+                  <LogIn className="w-4 h-4" />
+                  Logga in för att spara
+                </Link>
+              )}
             </div>
           </div>
 
