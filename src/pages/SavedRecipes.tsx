@@ -187,19 +187,24 @@ const SavedRecipes = () => {
                       </div>
                       {/* Price & info badges */}
                       <div className="flex flex-wrap gap-1.5 mb-1.5">
-                        {cost.total != null && (
-                          <span className="inline-flex items-center text-xs font-display font-bold bg-primary/15 text-primary px-2 py-0.5 rounded-md">
-                            💰 {cost.total} kr totalt
+                        {cost.total != null && portions && (
+                          <span className="inline-flex items-center text-xs font-display font-bold bg-primary/15 text-primary px-2.5 py-1 rounded-lg">
+                            🍽️ {Math.round(cost.total / parseInt(portions))} kr / portion
                           </span>
                         )}
-                        {cost.perPortion && (
-                          <span className="inline-flex items-center text-xs font-display font-semibold bg-secondary/10 text-secondary-foreground px-2 py-0.5 rounded-md">
-                            🍽️ {cost.perPortion} kr/portion
+                        {cost.total != null && (
+                          <span className="inline-flex items-center text-xs font-display font-semibold bg-muted text-muted-foreground px-2 py-0.5 rounded-md">
+                            💰 {cost.total} kr totalt
                           </span>
                         )}
                         {portions && (
                           <span className="inline-flex items-center text-xs font-display bg-muted text-muted-foreground px-2 py-0.5 rounded-md">
-                            👥 {portions} port.
+                            👥 {portions} portioner
+                          </span>
+                        )}
+                        {!portions && cost.total != null && (
+                          <span className="inline-flex items-center text-xs font-display font-bold bg-primary/15 text-primary px-2.5 py-1 rounded-lg">
+                            🍽️ {cost.total} kr / recept
                           </span>
                         )}
                         {recipe.cuisine && (
@@ -213,10 +218,8 @@ const SavedRecipes = () => {
                           </span>
                         )}
                       </div>
-                      <div className="flex flex-wrap gap-2 text-xs text-muted-foreground font-body">
-                        <span>
-                          {new Date(recipe.created_at).toLocaleDateString("sv-SE")}
-                        </span>
+                      <div className="text-xs text-muted-foreground font-body">
+                        {new Date(recipe.created_at).toLocaleDateString("sv-SE")}
                       </div>
                     </div>
                     <Button
