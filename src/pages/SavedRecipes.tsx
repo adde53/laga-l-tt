@@ -20,21 +20,34 @@ interface SavedRecipe {
   created_at: string;
 }
 
-const extractCost = (content: string): { total: string | null; perPortion: string | null } => {
-  const m = content.match(/💰\s*(?:Total(?:kostnad)?|Totalt)[^:]*:\s*~?(\d+(?:[,.]\d+)?)\s*kr(?:\s*\(~?(\d+(?:[,.]\d+)?)\s*kr\/portion\))?/i);
-  if (m) {
-    let perPortion = m[2] || null;
-    // Calculate per-portion if we have total and portions but no explicit per-portion
-    if (!perPortion && m[1]) {
-      const portionsMatch = content.match(/👥\s*(\d+)\s*portioner/i);
-      if (portionsMatch) {
-        const pp = Math.round(parseFloat(m[1].replace(",", ".")) / parseInt(portionsMatch[1]));
-        perPortion = String(pp);
-      }
-    }
-    return { total: m[1], perPortion };
+const extractCost = (content: string, budget: number | null): { total: number | null; perPortion: string | null; ingredientCount: number } => {
+  // Try explicit total pattern first
+  const totalMatch = content.match(/💰\s*(?:Total(?:kostnad)?|Totalt)[^:]*:\s*~?(\d+(?:[,.]\d+)?)\s*kr/i);
+  const portionsMatch = content.match(/👥\s*(\d+)\s*portioner/i);
+  
+  if (totalMatch) {
+    const total = parseFloat(totalMatch[1].replace(",", "."));
+    const portions = portionsMatch ? parseInt(portionsMatch[1]) : null;
+    const perPortion = portions ? String(Math.round(total / portions)) : null;
+    return { total, perPortion, ingredientCount: 0 };
   }
-  return { total: null, perPortion: null };
+  
+  // Fallback: sum all inline prices like "(12 kr)", "(3 kr)"
+  const priceMatches = content.matchAll(/\((\d+(?:[,.]\d+)?)\s*kr\)/gi);
+  let sum = 0;
+  let count = 0;
+  for (const m of priceMatches) {
+    sum += parseFloat(m[1].replace(",", "."));
+    count++;
+  }
+  
+  if (sum > 0) {
+    const portions = portionsMatch ? parseInt(portionsMatch[1]) : null;
+    const perPortion = portions ? String(Math.round(sum / portions)) : null;
+    return { total: sum, perPortion, ingredientCount: count };
+  }
+  
+  return { total: null, perPortion: null, ingredientCount: 0 };
 };
 
 const extractPortions = (content: string): string | null => {
@@ -156,7 +169,7 @@ const SavedRecipes = () => {
         ) : (
           <div className="space-y-3">
             {filteredRecipes.map((recipe) => {
-              const cost = extractCost(recipe.content);
+              const cost = extractCost(recipe.content, recipe.budget);
               const portions = extractPortions(recipe.content);
               return (
                 <div
@@ -172,16 +185,16 @@ const SavedRecipes = () => {
                           {recipe.title}
                         </h3>
                       </div>
-                      {/* Price & portions badges */}
-                      <div className="flex flex-wrap gap-1.5 mb-1">
-                        {cost.perPortion && (
+                      {/* Price & info badges */}
+                      <div className="flex flex-wrap gap-1.5 mb-1.5">
+                        {cost.total != null && (
                           <span className="inline-flex items-center text-xs font-display font-bold bg-primary/15 text-primary px-2 py-0.5 rounded-md">
-                            🍽️ {cost.perPortion} kr/portion
+                            💰 {cost.total} kr totalt
                           </span>
                         )}
-                        {cost.total && (
-                          <span className="inline-flex items-center text-xs font-display bg-muted text-muted-foreground px-2 py-0.5 rounded-md">
-                            💰 {cost.total} kr totalt
+                        {cost.perPortion && (
+                          <span className="inline-flex items-center text-xs font-display font-semibold bg-secondary/10 text-secondary-foreground px-2 py-0.5 rounded-md">
+                            🍽️ {cost.perPortion} kr/portion
                           </span>
                         )}
                         {portions && (
@@ -189,12 +202,18 @@ const SavedRecipes = () => {
                             👥 {portions} port.
                           </span>
                         )}
+                        {recipe.cuisine && (
+                          <span className="inline-flex items-center text-xs font-display bg-muted text-muted-foreground px-2 py-0.5 rounded-md">
+                            🌍 {recipe.cuisine}
+                          </span>
+                        )}
+                        {recipe.store && (
+                          <span className="inline-flex items-center text-xs font-display bg-muted text-muted-foreground px-2 py-0.5 rounded-md">
+                            🏪 {recipe.store}
+                          </span>
+                        )}
                       </div>
                       <div className="flex flex-wrap gap-2 text-xs text-muted-foreground font-body">
-                        {recipe.budget && <span>💰 {recipe.budget} kr budget</span>}
-                        {recipe.craving && <span>🤤 {recipe.craving}</span>}
-                        {recipe.cuisine && <span>🌍 {recipe.cuisine}</span>}
-                        {recipe.store && <span>🏪 {recipe.store}</span>}
                         <span>
                           {new Date(recipe.created_at).toLocaleDateString("sv-SE")}
                         </span>
