@@ -22,7 +22,19 @@ interface SavedRecipe {
 
 const extractCost = (content: string): { total: string | null; perPortion: string | null } => {
   const m = content.match(/💰\s*(?:Total(?:kostnad)?|Totalt)[^:]*:\s*~?(\d+(?:[,.]\d+)?)\s*kr(?:\s*\(~?(\d+(?:[,.]\d+)?)\s*kr\/portion\))?/i);
-  return m ? { total: m[1], perPortion: m[2] || null } : { total: null, perPortion: null };
+  if (m) {
+    let perPortion = m[2] || null;
+    // Calculate per-portion if we have total and portions but no explicit per-portion
+    if (!perPortion && m[1]) {
+      const portionsMatch = content.match(/👥\s*(\d+)\s*portioner/i);
+      if (portionsMatch) {
+        const pp = Math.round(parseFloat(m[1].replace(",", ".")) / parseInt(portionsMatch[1]));
+        perPortion = String(pp);
+      }
+    }
+    return { total: m[1], perPortion };
+  }
+  return { total: null, perPortion: null };
 };
 
 const extractPortions = (content: string): string | null => {
@@ -162,14 +174,14 @@ const SavedRecipes = () => {
                       </div>
                       {/* Price & portions badges */}
                       <div className="flex flex-wrap gap-1.5 mb-1">
-                        {cost.total && (
-                          <span className="inline-flex items-center text-xs font-display font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-md">
-                            💰 {cost.total} kr
+                        {cost.perPortion && (
+                          <span className="inline-flex items-center text-xs font-display font-bold bg-primary/15 text-primary px-2 py-0.5 rounded-md">
+                            🍽️ {cost.perPortion} kr/portion
                           </span>
                         )}
-                        {cost.perPortion && (
+                        {cost.total && (
                           <span className="inline-flex items-center text-xs font-display bg-muted text-muted-foreground px-2 py-0.5 rounded-md">
-                            {cost.perPortion} kr/portion
+                            💰 {cost.total} kr totalt
                           </span>
                         )}
                         {portions && (
