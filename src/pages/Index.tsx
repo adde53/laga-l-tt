@@ -1,4 +1,4 @@
-import RecipeForm from "@/components/RecipeForm"; // redesigned
+import RecipeForm from "@/components/RecipeForm";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,19 +18,24 @@ import {
   ChefHatIllustration,
 } from "@/components/illustrations/FoodIllustrations";
 
-const NewsletterSection = () => {
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [subscribed, setSubscribed] = useState(false);
+const Index = () => {
+  const { user, signOut } = useAuth();
+  const [nlEmail, setNlEmail] = useState("");
+  const [nlLoading, setNlLoading] = useState(false);
+  const [nlDone, setNlDone] = useState(false);
 
-  const handleSubscribe = async (e: React.FormEvent) => {
+  const scrollToForm = () => {
+    document.getElementById("recipe-form")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = email.trim().toLowerCase();
+    const trimmed = nlEmail.trim().toLowerCase();
     if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
       toast.error("Ange en giltig e-postadress");
       return;
     }
-    setLoading(true);
+    setNlLoading(true);
     try {
       const { error } = await supabase
         .from("newsletter_subscribers" as any)
@@ -38,65 +43,17 @@ const NewsletterSection = () => {
       if (error) {
         if (error.code === "23505") {
           toast.info("Du prenumererar redan! 🎉");
-          setSubscribed(true);
+          setNlDone(true);
         } else throw error;
       } else {
-        setSubscribed(true);
+        setNlDone(true);
         toast.success("Välkommen! Du får ditt första veckobrev nästa måndag 🎉");
       }
     } catch (err) {
       toast.error("Något gick fel, försök igen");
     } finally {
-      setLoading(false);
+      setNlLoading(false);
     }
-  };
-
-  return (
-    <section className="relative z-10 bg-card border-t border-border">
-      <div className="container max-w-2xl mx-auto px-5 py-12">
-        <div className="form-card p-6 md:p-8 shadow-lg">
-          {subscribed ? (
-            <div className="text-center py-6 space-y-2 animate-fade-in-up">
-              <CheckCircle className="w-10 h-10 text-primary mx-auto" />
-              <p className="font-display font-bold text-foreground">Du är med! 🎉</p>
-              <p className="text-sm text-muted-foreground">Varje måndag får du 5 budgetrecept baserade på veckans erbjudanden.</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="form-icon-badge">
-                  <Mail className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <div>
-                  <h3 className="font-display text-lg font-bold text-foreground">Gratis veckomeny – varje måndag</h3>
-                  <p className="text-sm text-muted-foreground">5 recept · 4 portioner · under 500 kr · baserat på veckans erbjudanden</p>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2 text-xs">
-                <span className="inline-flex items-center gap-1 bg-primary/10 text-primary rounded-full px-2.5 py-1 font-medium">
-                  <Utensils className="w-3 h-3" /> Balanserat: protein, grönsaker & kolhydrater
-                </span>
-                <span className="inline-flex items-center gap-1 bg-secondary/10 text-secondary-foreground rounded-full px-2.5 py-1 font-medium">
-                  📬 Skickas automatiskt varje måndag
-                </span>
-              </div>
-              <form onSubmit={handleSubscribe} className="flex gap-2">
-                <Input type="email" placeholder="din@epost.se" value={email} onChange={(e) => setEmail(e.target.value)} required className="flex-1" disabled={loading} />
-                <Button type="submit" disabled={loading} className="shrink-0">{loading ? "Skickar..." : "Prenumerera"}</Button>
-              </form>
-              <p className="text-[11px] text-muted-foreground/60">Ingen spam – bara recept. Avsluta när du vill.</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </section>
-  );
-};
-const Index = () => {
-  const { user, signOut } = useAuth();
-
-  const scrollToForm = () => {
-    document.getElementById("recipe-form")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -225,6 +182,54 @@ const Index = () => {
         </div>
       </section>
 
+      {/* ═══════════════════════════════════════════ */}
+      {/* 📬 NEWSLETTER SIGNUP – prominent placement */}
+      {/* ═══════════════════════════════════════════ */}
+      <section className="relative z-10 container max-w-2xl mx-auto px-5 pb-6">
+        <div className="rounded-2xl border-2 border-primary/30 bg-primary/5 p-5 md:p-6 shadow-md">
+          {nlDone ? (
+            <div className="text-center py-4 space-y-2 animate-fade-in-up">
+              <CheckCircle className="w-10 h-10 text-primary mx-auto" />
+              <p className="font-display font-bold text-foreground">Du är med! 🎉</p>
+              <p className="text-sm text-muted-foreground">Varje måndag får du 5 budgetrecept baserade på veckans erbjudanden.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
+                  <Mail className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <div>
+                  <h3 className="font-display text-base md:text-lg font-bold text-foreground">
+                    📬 Gratis veckomeny – varje måndag
+                  </h3>
+                  <p className="text-xs md:text-sm text-muted-foreground">
+                    5 recept · 4 portioner · under 500 kr · protein, grönsaker & kolhydrater
+                  </p>
+                </div>
+              </div>
+              <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
+                <Input
+                  type="email"
+                  placeholder="din@epost.se"
+                  value={nlEmail}
+                  onChange={(e) => setNlEmail(e.target.value)}
+                  required
+                  className="flex-1"
+                  disabled={nlLoading}
+                />
+                <Button type="submit" disabled={nlLoading} size="lg" className="shrink-0 font-display font-bold">
+                  {nlLoading ? "Skickar..." : "Prenumerera gratis"}
+                </Button>
+              </form>
+              <p className="text-[11px] text-muted-foreground/60 text-center">
+                Ingen spam – bara recept baserade på veckans erbjudanden. Avsluta när du vill.
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* Wavy divider */}
       <div className="relative z-10 -mb-1" aria-hidden="true">
         <svg viewBox="0 0 1440 80" fill="none" className="w-full h-auto" preserveAspectRatio="none">
@@ -294,9 +299,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-
-      {/* Newsletter signup */}
-      <NewsletterSection />
 
       {/* Footer */}
       <footer className="relative z-10 bg-foreground/[0.03] border-t border-border">
