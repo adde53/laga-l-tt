@@ -1,4 +1,5 @@
 import RecipeForm from "@/components/RecipeForm"; // redesigned
+import NewsletterSignup from "@/components/NewsletterSignup";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -213,6 +214,15 @@ const Index = () => {
                 <p className="text-xs leading-relaxed">{item.text}</p>
               </article>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter signup */}
+      <section className="relative z-10 bg-card">
+        <div className="container max-w-2xl mx-auto px-5 pb-12">
+          <div className="form-card p-6 md:p-8">
+            <NewsletterSignup />
           </div>
         </div>
       </section>
