@@ -21,8 +21,8 @@ const NewsletterSignup = () => {
     setLoading(true);
     try {
       const { error } = await supabase
-        .from("newsletter_subscribers")
-        .insert({ email: trimmed });
+        .from("newsletter_subscribers" as any)
+        .insert({ email: trimmed } as any);
 
       if (error) {
         if (error.code === "23505") {
@@ -35,7 +35,7 @@ const NewsletterSignup = () => {
         setSubscribed(true);
         toast.success("Välkommen! Du får ditt första veckobrev nästa måndag 🎉");
       }
-    } catch {
+    } catch (err) {
       toast.error("Något gick fel, försök igen");
     } finally {
       setLoading(false);

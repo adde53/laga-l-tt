@@ -1,9 +1,12 @@
 import RecipeForm from "@/components/RecipeForm"; // redesigned
-import NewsletterSignup from "@/components/NewsletterSignup";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
-import { BookOpen, LogIn, LogOut, ArrowDown } from "lucide-react";
+import { BookOpen, LogIn, LogOut, Mail, CheckCircle, Utensils } from "lucide-react";
+import { toast } from "sonner";
 import {
   PotIllustration,
   CarrotIllustration,
@@ -15,6 +18,80 @@ import {
   ChefHatIllustration,
 } from "@/components/illustrations/FoodIllustrations";
 
+const NewsletterSection = () => {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = email.trim().toLowerCase();
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      toast.error("Ange en giltig e-postadress");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from("newsletter_subscribers" as any)
+        .insert({ email: trimmed } as any);
+      if (error) {
+        if (error.code === "23505") {
+          toast.info("Du prenumererar redan! 🎉");
+          setSubscribed(true);
+        } else throw error;
+      } else {
+        setSubscribed(true);
+        toast.success("Välkommen! Du får ditt första veckobrev nästa måndag 🎉");
+      }
+    } catch (err) {
+      toast.error("Något gick fel, försök igen");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <section className="relative z-10 bg-card border-t border-border">
+      <div className="container max-w-2xl mx-auto px-5 py-12">
+        <div className="form-card p-6 md:p-8 shadow-lg">
+          {subscribed ? (
+            <div className="text-center py-6 space-y-2 animate-fade-in-up">
+              <CheckCircle className="w-10 h-10 text-primary mx-auto" />
+              <p className="font-display font-bold text-foreground">Du är med! 🎉</p>
+              <p className="text-sm text-muted-foreground">Varje måndag får du 5 budgetrecept baserade på veckans erbjudanden.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="form-icon-badge">
+                  <Mail className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <div>
+                  <h3 className="font-display text-lg font-bold text-foreground">Gratis veckomeny – varje måndag</h3>
+                  <p className="text-sm text-muted-foreground">5 recept · 4 portioner · under 500 kr · baserat på veckans erbjudanden</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2 text-xs">
+                <span className="inline-flex items-center gap-1 bg-primary/10 text-primary rounded-full px-2.5 py-1 font-medium">
+                  <Utensils className="w-3 h-3" /> Balanserat: protein, grönsaker & kolhydrater
+                </span>
+                <span className="inline-flex items-center gap-1 bg-secondary/10 text-secondary-foreground rounded-full px-2.5 py-1 font-medium">
+                  📬 Skickas automatiskt varje måndag
+                </span>
+              </div>
+              <form onSubmit={handleSubscribe} className="flex gap-2">
+                <Input type="email" placeholder="din@epost.se" value={email} onChange={(e) => setEmail(e.target.value)} required className="flex-1" disabled={loading} />
+                <Button type="submit" disabled={loading} className="shrink-0">{loading ? "Skickar..." : "Prenumerera"}</Button>
+              </form>
+              <p className="text-[11px] text-muted-foreground/60">Ingen spam – bara recept. Avsluta när du vill.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+};
 const Index = () => {
   const { user, signOut } = useAuth();
 
@@ -219,13 +296,7 @@ const Index = () => {
       </section>
 
       {/* Newsletter signup */}
-      <section className="relative z-10 bg-card">
-        <div className="container max-w-2xl mx-auto px-5 pb-12">
-          <div className="form-card p-6 md:p-8">
-            <NewsletterSignup />
-          </div>
-        </div>
-      </section>
+      <NewsletterSection />
 
       {/* Footer */}
       <footer className="relative z-10 bg-foreground/[0.03] border-t border-border">
