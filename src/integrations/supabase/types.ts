@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      newsletter_subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_active: boolean
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_active?: boolean
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_active?: boolean
+        }
+        Relationships: []
+      }
       saved_recipes: {
         Row: {
           budget: number | null
