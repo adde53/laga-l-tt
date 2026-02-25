@@ -1,4 +1,5 @@
 import RecipeForm from "@/components/RecipeForm";
+import RecipeShowcase from "@/components/RecipeShowcase";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -181,6 +182,9 @@ const Index = () => {
           ))}
         </div>
       </section>
+
+      {/* ══ Recipe Showcase ══ */}
+      <RecipeShowcase />
 
       {/* ═══════════════════════════════════════════ */}
       {/* 📬 NEWSLETTER SIGNUP – prominent placement */}

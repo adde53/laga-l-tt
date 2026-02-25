@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      featured_recipes: {
+        Row: {
+          cook_time_minutes: number
+          cost_per_portion: number | null
+          created_at: string
+          cuisine: string | null
+          description: string
+          id: string
+          ingredient_count: number
+          servings: number
+          title: string
+          total_cost: number
+        }
+        Insert: {
+          cook_time_minutes: number
+          cost_per_portion?: number | null
+          created_at?: string
+          cuisine?: string | null
+          description: string
+          id?: string
+          ingredient_count: number
+          servings?: number
+          title: string
+          total_cost: number
+        }
+        Update: {
+          cook_time_minutes?: number
+          cost_per_portion?: number | null
+          created_at?: string
+          cuisine?: string | null
+          description?: string
+          id?: string
+          ingredient_count?: number
+          servings?: number
+          title?: string
+          total_cost?: number
+        }
+        Relationships: []
+      }
       newsletter_drafts: {
         Row: {
           content: string
