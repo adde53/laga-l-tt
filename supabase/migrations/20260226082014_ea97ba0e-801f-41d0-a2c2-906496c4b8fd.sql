@@ -1,0 +1,1 @@
+ALTER TABLE public.newsletter_settings ADD COLUMN send_minute integer NOT NULL DEFAULT 0;

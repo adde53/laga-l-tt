@@ -31,6 +31,7 @@ interface Settings {
   id: string;
   send_day: number;
   send_hour: number;
+  send_minute: number;
 }
 
 const dayNames = ["Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag"];
@@ -255,19 +256,35 @@ const Admin = () => {
             </div>
             <div className="space-y-1">
               <label className="text-sm text-muted-foreground">Tid</label>
-              <Select
-                value={String(settings?.send_hour ?? 8)}
-                onValueChange={(v) => updateSettings("send_hour", parseInt(v))}
-              >
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 24 }, (_, i) => (
-                    <SelectItem key={i} value={String(i)}>{String(i).padStart(2, "0")}:00</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-1">
+                <Select
+                  value={String(settings?.send_hour ?? 8)}
+                  onValueChange={(v) => updateSettings("send_hour", parseInt(v))}
+                >
+                  <SelectTrigger className="w-20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <SelectItem key={i} value={String(i)}>{String(i).padStart(2, "0")}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <span className="text-muted-foreground font-bold">:</span>
+                <Select
+                  value={String(settings?.send_minute ?? 0)}
+                  onValueChange={(v) => updateSettings("send_minute", parseInt(v))}
+                >
+                  <SelectTrigger className="w-20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 60 }, (_, i) => (
+                      <SelectItem key={i} value={String(i)}>{String(i).padStart(2, "0")}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </div>
