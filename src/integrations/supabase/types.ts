@@ -94,6 +94,7 @@ export type Database = {
           id: string
           send_day: number
           send_hour: number
+          send_minute: number
           updated_at: string
           updated_by: string | null
         }
@@ -101,6 +102,7 @@ export type Database = {
           id?: string
           send_day?: number
           send_hour?: number
+          send_minute?: number
           updated_at?: string
           updated_by?: string | null
         }
@@ -108,6 +110,7 @@ export type Database = {
           id?: string
           send_day?: number
           send_hour?: number
+          send_minute?: number
           updated_at?: string
           updated_by?: string | null
         }
