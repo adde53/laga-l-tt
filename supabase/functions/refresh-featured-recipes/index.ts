@@ -86,7 +86,7 @@ Blanda olika kök och prisklasser. Svara ENBART med en JSON-array, inget annat.`
     });
   } catch (error) {
     console.error("Error refreshing featured recipes:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: (error as Error).message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

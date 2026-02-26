@@ -1,12 +1,12 @@
 import RecipeForm from "@/components/RecipeForm";
 import RecipeShowcase from "@/components/RecipeShowcase";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
-import { BookOpen, LogIn, LogOut, Mail, CheckCircle, Utensils } from "lucide-react";
+import { BookOpen, LogIn, LogOut, Mail, CheckCircle, Utensils, Settings } from "lucide-react";
 import { toast } from "sonner";
 import {
   PotIllustration,
@@ -24,6 +24,22 @@ const Index = () => {
   const [nlEmail, setNlEmail] = useState("");
   const [nlLoading, setNlLoading] = useState(false);
   const [nlDone, setNlDone] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .then(({ data }) => {
+          setIsAdmin(!!data && data.length > 0);
+        });
+    } else {
+      setIsAdmin(false);
+    }
+  }, [user]);
 
   const scrollToForm = () => {
     document.getElementById("recipe-form")?.scrollIntoView({ behavior: "smooth" });
@@ -76,6 +92,13 @@ const Index = () => {
                   <BookOpen className="w-4 h-4" /> Mina recept
                 </Button>
               </Link>
+              {isAdmin && (
+                <Link to="/admin">
+                  <Button variant="ghost" size="sm" className="font-display text-sm gap-1.5 text-muted-foreground hover:text-foreground">
+                    <Settings className="w-4 h-4" /> Admin
+                  </Button>
+                </Link>
+              )}
               <Button variant="ghost" size="sm" className="font-display text-sm gap-1.5 text-muted-foreground hover:text-foreground" onClick={signOut}>
                 <LogOut className="w-4 h-4" /> Logga ut
               </Button>
