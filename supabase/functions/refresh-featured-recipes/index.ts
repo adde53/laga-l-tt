@@ -19,7 +19,6 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Generate 6 new featured recipes via AI
     const prompt = `Du är en svensk receptgenerator. Skapa exakt 6 olika recept som JSON-array.
 Varje recept ska ha dessa fält:
 - title (kreativt svenskt namn, max 40 tecken)
@@ -30,6 +29,7 @@ Varje recept ska ha dessa fält:
 - ingredient_count (antal ingredienser, 4-12)
 - cuisine (en av: Italienskt, Indiskt, Asiatiskt, Svenskt, Medelhavs, Mexikanskt)
 - servings (alltid 4)
+- content (komplett recept i markdown-format med rubrik, ingredienslista med mängder, steg-för-steg-instruktioner och eventuella tips. Formatera med ## för rubriker, - för ingredienser och numrerade steg.)
 
 Blanda olika kök och prisklasser. Svara ENBART med en JSON-array, inget annat.`;
 
@@ -53,7 +53,6 @@ Blanda olika kök och prisklasser. Svara ENBART med en JSON-array, inget annat.`
     const aiData = await aiResponse.json();
     const raw = aiData.choices?.[0]?.message?.content || "";
     
-    // Extract JSON from response (handle markdown code blocks)
     const jsonMatch = raw.match(/\[[\s\S]*\]/);
     if (!jsonMatch) throw new Error("Could not parse AI response as JSON array");
 
@@ -63,7 +62,6 @@ Blanda olika kök och prisklasser. Svara ENBART med en JSON-array, inget annat.`
       throw new Error("Invalid recipes array");
     }
 
-    // Clear old recipes and insert new ones
     await supabase.from("featured_recipes").delete().neq("id", "00000000-0000-0000-0000-000000000000");
 
     const { error: insertError } = await supabase.from("featured_recipes").insert(
@@ -76,6 +74,7 @@ Blanda olika kök och prisklasser. Svara ENBART med en JSON-array, inget annat.`
         ingredient_count: Number(r.ingredient_count) || 7,
         cuisine: r.cuisine || "Svenskt",
         servings: 4,
+        content: r.content || null,
       }))
     );
 
