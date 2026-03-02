@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       featured_recipes: {
         Row: {
+          content: string | null
           cook_time_minutes: number
           cost_per_portion: number | null
           created_at: string
@@ -28,6 +29,7 @@ export type Database = {
           total_cost: number
         }
         Insert: {
+          content?: string | null
           cook_time_minutes: number
           cost_per_portion?: number | null
           created_at?: string
@@ -40,6 +42,7 @@ export type Database = {
           total_cost: number
         }
         Update: {
+          content?: string | null
           cook_time_minutes?: number
           cost_per_portion?: number | null
           created_at?: string

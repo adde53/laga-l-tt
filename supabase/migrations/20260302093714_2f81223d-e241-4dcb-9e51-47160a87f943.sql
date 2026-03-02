@@ -1,0 +1,1 @@
+ALTER TABLE public.featured_recipes ADD COLUMN content text;
