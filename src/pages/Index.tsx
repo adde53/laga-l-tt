@@ -79,12 +79,12 @@ const Index = () => {
       <div className="hero-mesh" aria-hidden="true" />
 
       {/* Nav */}
-      <nav className="relative z-10 container max-w-6xl mx-auto px-5 pt-5 flex items-center justify-between">
+      <nav className="relative z-10 container max-w-6xl mx-auto px-4 pt-4 md:px-5 md:pt-5 flex items-center justify-between gap-2">
         <span className="font-display text-xl font-bold tracking-tight">
           <span className="text-foreground">Veckans</span>
           <span className="hero-text-gradient">MatFynd</span>
         </span>
-        <div className="flex gap-1">
+        <div className="flex gap-0.5 md:gap-1 shrink-0">
           {user ? (
             <>
               <Link to="/saved">
