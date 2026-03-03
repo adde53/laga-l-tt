@@ -141,7 +141,7 @@ const RecipeDetailDialog = ({ recipe, open, onClose }: { recipe: FeaturedRecipe 
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto mx-4">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-2xl">{emoji}</span>
@@ -198,7 +198,7 @@ const RecipeDetailDialog = ({ recipe, open, onClose }: { recipe: FeaturedRecipe 
           </div>
         </div>
 
-        <div className="rounded-xl bg-muted/50 p-3 mt-1 flex items-center justify-center gap-2">
+        <div className="rounded-xl bg-muted/50 p-2.5 mt-1 flex items-center justify-center gap-2">
           <Users className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm font-body text-muted-foreground">{recipe.servings} portioner</span>
         </div>

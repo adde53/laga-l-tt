@@ -351,7 +351,7 @@ const RecipeForm = () => {
       </div>
 
       {/* Budget + Portions + Store row */}
-      <div className="grid grid-cols-3 gap-3 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
         <div className="space-y-2">
           <label className="section-label">💰 Budget</label>
           <Input
@@ -375,7 +375,7 @@ const RecipeForm = () => {
             max="20"
           />
         </div>
-        <div className="space-y-2">
+        <div className="space-y-2 col-span-2 md:col-span-1">
           <label className="section-label">🏪 Butik</label>
           <Select value={store} onValueChange={setStore}>
             <SelectTrigger className="input-field w-full">
