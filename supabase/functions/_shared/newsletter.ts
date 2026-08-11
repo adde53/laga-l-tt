@@ -31,7 +31,7 @@ export function wrapEmail(opts: {
 <html lang="sv"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" /><title>${escapeHtml(
     opts.subject,
   )}</title></head>
-<body style="margin:0;padding:0;background:#ffffff;font-family:Helvetica,Arial,sans-serif;color:#2b2ب2b;">
+<body style="margin:0;padding:0;background:#ffffff;font-family:Helvetica,Arial,sans-serif;color:#2b2b2b;">
   <div style="max-width:600px;margin:0 auto;padding:24px 20px;">
     <div style="text-align:center;padding-bottom:16px;border-bottom:2px solid #f0ece6;">
       <div style="font-size:22px;font-weight:700;letter-spacing:-0.5px;">Veckans<span style="color:#e2622b;">MatFynd</span></div>
