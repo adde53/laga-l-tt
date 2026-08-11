@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 serve(async (req) => {
@@ -17,9 +17,22 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Optionally verify admin via auth header
-    const authHeader = req.headers.get("Authorization");
-    if (authHeader) {
+    // Auth: admin user, or the internal scheduler secret
+    const cronSecret = req.headers.get("x-cron-secret");
+    if (cronSecret) {
+      const { data: cronSettings } = await supabase
+        .from("newsletter_settings")
+        .select("cron_secret")
+        .limit(1)
+        .maybeSingle();
+      if (!cronSettings?.cron_secret || cronSettings.cron_secret !== cronSecret) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+      }
+    } else {
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: corsHeaders });
+      }
       const token = authHeader.replace("Bearer ", "");
       const { data: claims, error: claimsErr } = await supabase.auth.getUser(token);
       if (claimsErr || !claims?.user) {
