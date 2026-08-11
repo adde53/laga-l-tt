@@ -94,26 +94,41 @@ export type Database = {
       }
       newsletter_settings: {
         Row: {
+          auto_send: boolean
+          cron_secret: string
           id: string
+          last_auto_run_at: string | null
+          require_approval: boolean
           send_day: number
           send_hour: number
           send_minute: number
+          timezone: string
           updated_at: string
           updated_by: string | null
         }
         Insert: {
+          auto_send?: boolean
+          cron_secret?: string
           id?: string
+          last_auto_run_at?: string | null
+          require_approval?: boolean
           send_day?: number
           send_hour?: number
           send_minute?: number
+          timezone?: string
           updated_at?: string
           updated_by?: string | null
         }
         Update: {
+          auto_send?: boolean
+          cron_secret?: string
           id?: string
+          last_auto_run_at?: string | null
+          require_approval?: boolean
           send_day?: number
           send_hour?: number
           send_minute?: number
+          timezone?: string
           updated_at?: string
           updated_by?: string | null
         }
@@ -125,18 +140,24 @@ export type Database = {
           email: string
           id: string
           is_active: boolean
+          unsubscribe_token: string
+          unsubscribed_at: string | null
         }
         Insert: {
           created_at?: string
           email: string
           id?: string
           is_active?: boolean
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
         }
         Update: {
           created_at?: string
           email?: string
           id?: string
           is_active?: boolean
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
         }
         Relationships: []
       }
