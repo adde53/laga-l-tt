@@ -8,6 +8,10 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import SavedRecipes from "./pages/SavedRecipes";
 import Admin from "./pages/Admin";
+import Veckomeny from "./pages/Veckomeny";
+import BilligaRecept from "./pages/BilligaRecept";
+import MatladaBudget from "./pages/MatladaBudget";
+import Unsubscribe from "./pages/Unsubscribe";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +28,10 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/saved" element={<SavedRecipes />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/veckomeny" element={<Veckomeny />} />
+            <Route path="/billiga-recept" element={<BilligaRecept />} />
+            <Route path="/matlada-budget" element={<MatladaBudget />} />
+            <Route path="/avprenumerera" element={<Unsubscribe />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

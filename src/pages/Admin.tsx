@@ -32,6 +32,10 @@ interface Settings {
   send_day: number;
   send_hour: number;
   send_minute: number;
+  auto_send: boolean;
+  require_approval: boolean;
+  timezone: string | null;
+  last_auto_run_at: string | null;
 }
 
 const dayNames = ["Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag"];
@@ -47,6 +51,8 @@ const Admin = () => {
   const [generating, setGenerating] = useState(false);
   const [sending, setSending] = useState<string | null>(null);
   const [subscriberCount, setSubscriberCount] = useState(0);
+  const [testEmail, setTestEmail] = useState("");
+  const [testing, setTesting] = useState<string | null>(null);
 
   // Check admin role
   useEffect(() => {
@@ -162,6 +168,38 @@ const Admin = () => {
     toast.success("Inställning sparad");
   };
 
+  const updateFlag = async (field: "auto_send" | "require_approval", value: boolean) => {
+    if (!settings) return;
+    await supabase
+      .from("newsletter_settings" as any)
+      .update({ [field]: value, updated_by: user?.id } as any)
+      .eq("id", settings.id);
+    setSettings({ ...settings, [field]: value });
+    toast.success("Inställning sparad");
+  };
+
+  const sendTest = async (draftId: string) => {
+    const email = testEmail.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error("Ange en giltig e-postadress för testet");
+      return;
+    }
+    setTesting(draftId);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await supabase.functions.invoke("send-newsletter", {
+        body: { draftId, testEmail: email },
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      if (res.error) throw res.error;
+      toast.success(`Testmejl skickat till ${email}`);
+    } catch (e: any) {
+      toast.error(e.message || "Kunde inte skicka testmejl");
+    } finally {
+      setTesting(null);
+    }
+  };
+
   if (authLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin w-8 h-8 text-primary" /></div>;
   if (!user) return <Navigate to="/auth" replace />;
   if (isAdmin === null) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin w-8 h-8 text-primary" /></div>;
@@ -207,6 +245,61 @@ const Admin = () => {
               <Button variant="outline" onClick={() => setEditingDraft(null)}>Avbryt</Button>
             </div>
           </div>
+
+          <div className="mt-5 pt-5 border-t space-y-3">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                className="mt-1 h-4 w-4 accent-primary"
+                checked={!!settings?.auto_send}
+                onChange={(e) => updateFlag("auto_send", e.target.checked)}
+              />
+              <span>
+                <span className="text-sm font-medium text-foreground block">Automatiskt utskick</span>
+                <span className="text-xs text-muted-foreground">
+                  Skicka veckomenyn automatiskt till alla aktiva prenumeranter på den valda tiden.
+                </span>
+              </span>
+            </label>
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                className="mt-1 h-4 w-4 accent-primary"
+                checked={!!settings?.require_approval}
+                onChange={(e) => updateFlag("require_approval", e.target.checked)}
+              />
+              <span>
+                <span className="text-sm font-medium text-foreground block">Kräv godkännande</span>
+                <span className="text-xs text-muted-foreground">
+                  Endast godkända utkast skickas. Avmarkera för att låta systemet generera och
+                  skicka helt automatiskt.
+                </span>
+              </span>
+            </label>
+            {settings?.last_auto_run_at && (
+              <p className="text-xs text-muted-foreground">
+                Senaste automatiska körning:{" "}
+                {new Date(settings.last_auto_run_at).toLocaleString("sv-SE")}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Test send */}
+        <div className="rounded-xl border bg-card p-5 mb-8">
+          <h2 className="font-display text-lg font-bold mb-1 flex items-center gap-2">
+            <Mail className="w-5 h-5 text-primary" /> Testmejl
+          </h2>
+          <p className="text-xs text-muted-foreground mb-3">
+            Ange en adress och klicka på "Testa" vid ett utkast nedan för att se hur mejlet ser ut.
+          </p>
+          <Input
+            type="email"
+            placeholder="din@epost.se"
+            value={testEmail}
+            onChange={(e) => setTestEmail(e.target.value)}
+            className="max-w-sm"
+          />
         </div>
       </div>
     );
@@ -339,6 +432,15 @@ const Admin = () => {
                         </Button>
                       )}
                       {(draft.status === "approved" || draft.status === "draft") && (
+                        <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => sendTest(draft.id)}
+                          disabled={testing === draft.id}
+                        >
+                          {testing === draft.id ? <Loader2 className="w-4 h-4 animate-spin" /> : "Testa"}
+                        </Button>
                         <Button
                           size="sm"
                           onClick={() => sendNewsletter(draft.id)}
@@ -347,6 +449,7 @@ const Admin = () => {
                           {sending === draft.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4 mr-1" />}
                           Skicka
                         </Button>
+                        </>
                       )}
                     </div>
                   )}

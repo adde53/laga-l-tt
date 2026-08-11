@@ -1,5 +1,7 @@
 import RecipeForm from "@/components/RecipeForm";
 import RecipeShowcase from "@/components/RecipeShowcase";
+import Seo from "@/components/Seo";
+import SiteFooter from "@/components/SiteFooter";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -75,6 +77,52 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
+      <Seo
+        title="VeckansMatFynd – veckomeny för 4 personer under 500 kr"
+        description="Få en gratis veckomeny varje vecka: 5 middagar för 4 personer under 500 kr, byggd på veckans erbjudanden i ICA, Coop, Willys, Hemköp och Lidl."
+        path="/"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "VeckansMatFynd",
+            url: "/",
+            inLanguage: "sv-SE",
+            description:
+              "Veckomeny och billiga recept baserade på veckans erbjudanden i svenska matbutiker.",
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "Vad kostar VeckansMatFynd?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Tjänsten är gratis. Du får veckomenyn via e-post och kan avprenumerera med ett klick.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Hur mycket kostar veckans meny?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Vi bygger fem middagar för fyra personer för under 500 kronor totalt, baserat på veckans erbjudanden.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Vilka butiker används?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Erbjudanden hämtas från ICA, Coop, Willys, Hemköp och Lidl.",
+                },
+              },
+            ],
+          },
+        ]}
+      />
       {/* Animated gradient mesh background */}
       <div className="hero-mesh" aria-hidden="true" />
 
@@ -85,6 +133,16 @@ const Index = () => {
           <span className="hero-text-gradient">MatFynd</span>
         </span>
         <div className="flex gap-0.5 md:gap-1 shrink-0">
+          <Link to="/veckomeny" className="hidden sm:block">
+            <Button variant="ghost" size="sm" className="font-display text-sm text-muted-foreground hover:text-foreground">
+              Veckomeny
+            </Button>
+          </Link>
+          <Link to="/billiga-recept" className="hidden sm:block">
+            <Button variant="ghost" size="sm" className="font-display text-sm text-muted-foreground hover:text-foreground">
+              Billiga recept
+            </Button>
+          </Link>
           {user ? (
             <>
               <Link to="/saved">
@@ -125,17 +183,22 @@ const Index = () => {
               <PanIllustration size={52} className="text-secondary hero-float" style={{ animationDelay: "0.8s" }} />
             </div>
 
-            <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight">
-              <span className="text-foreground">Veckans</span>
+            <span className="inline-flex items-center gap-2 rounded-full bg-secondary/10 text-secondary-foreground px-3 py-1 text-xs font-body font-semibold">
+              🇸🇪 Veckans erbjudanden · ICA · Coop · Willys · Hemköp · Lidl
+            </span>
+
+            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
+              <span className="text-foreground">Fem middagar.</span>
               <br />
-              <span className="hero-text-gradient">MatFynd</span>
+              <span className="hero-text-gradient">Under 500 kronor.</span>
             </h1>
 
             <div className="hero-strip max-w-xs mx-auto md:mx-0" aria-hidden="true" />
 
             <p className="font-body text-lg md:text-xl text-muted-foreground max-w-lg mx-auto md:mx-0 leading-relaxed">
-              Berätta vad du är sugen på – få recept som passar plånboken.
-              Vi hittar veckans bästa erbjudanden och skapar din meny&nbsp;automatiskt.
+              VeckansMatFynd läser veckans erbjudanden i svenska matbutiker och bygger
+              en balanserad veckomeny för fyra personer – med inköpslista. Skickas
+              gratis till din e-post varje vecka.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start pt-2">
@@ -324,25 +387,21 @@ const Index = () => {
               </article>
             ))}
           </div>
+          <div className="flex flex-wrap justify-center gap-3 pt-2">
+            <Link to="/veckomeny" className="rounded-full border border-primary/30 bg-primary/5 px-4 py-2 text-xs font-display font-bold text-foreground/70 hover:border-primary/60 transition-colors">
+              Veckomeny under 500 kr →
+            </Link>
+            <Link to="/billiga-recept" className="rounded-full border border-primary/30 bg-primary/5 px-4 py-2 text-xs font-display font-bold text-foreground/70 hover:border-primary/60 transition-colors">
+              Billiga recept per portion →
+            </Link>
+            <Link to="/matlada-budget" className="rounded-full border border-primary/30 bg-primary/5 px-4 py-2 text-xs font-display font-bold text-foreground/70 hover:border-primary/60 transition-colors">
+              Matlådor på budget →
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 bg-foreground/[0.03] border-t border-border">
-        <div className="container max-w-5xl mx-auto px-5 py-10 text-center">
-          <div className="flex items-center justify-center gap-4 mb-3">
-            <PotIllustration size={20} className="text-primary opacity-50" />
-            <CarrotIllustration size={18} className="text-accent-foreground opacity-40" />
-            <PanIllustration size={20} className="text-secondary opacity-45" />
-          </div>
-          <p className="font-display text-sm font-bold text-foreground/60">
-            Veckans<span className="hero-text-gradient">MatFynd</span> 2026
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground/50 font-body">
-            Billiga recept · Veckomeny · Budgetmat · Veckans erbjudanden
-          </p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 };
