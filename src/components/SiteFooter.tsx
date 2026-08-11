@@ -19,15 +19,17 @@ const SiteFooter = () => (
             Veckans<span className="hero-text-gradient">MatFynd</span>
           </p>
           <p className="mt-1 text-xs text-muted-foreground/60 font-body max-w-xs">
-            Veckomeny för 4 personer under 500 kr – byggd på veckans erbjudanden i
-            svenska matbutiker.
+            Billig veckomatsedel för 4 personer under 500 kr – byggd på veckans
+            erbjudanden i ICA, Coop, Willys, Hemköp och Lidl.
           </p>
         </div>
 
         <nav className="grid grid-cols-2 gap-x-10 gap-y-2 text-xs font-body text-muted-foreground/70 mx-auto md:mx-0">
           <Link to="/" className="hover:text-primary transition-colors">Start</Link>
           <Link to="/veckomeny" className="hover:text-primary transition-colors">Veckomeny</Link>
+          <Link to="/billig-veckomatsedel" className="hover:text-primary transition-colors">Billig veckomatsedel</Link>
           <Link to="/billiga-recept" className="hover:text-primary transition-colors">Billiga recept</Link>
+          <Link to="/billig-mat" className="hover:text-primary transition-colors">Billig mat</Link>
           <Link to="/matlada-budget" className="hover:text-primary transition-colors">Matlådor på budget</Link>
           <Link to="/saved" className="hover:text-primary transition-colors">Mina recept</Link>
           <Link to="/avprenumerera" className="hover:text-primary transition-colors">Avprenumerera</Link>
@@ -35,7 +37,7 @@ const SiteFooter = () => (
       </div>
 
       <p className="mt-8 pt-5 border-t border-border text-center text-[11px] text-muted-foreground/50 font-body">
-        © {new Date().getFullYear()} VeckansMatFynd · Billiga recept · Veckomeny · Budgetmat
+        © {new Date().getFullYear()} VeckansMatFynd · Billig veckomatsedel · Billiga recept · Veckomeny · Billig mat
       </p>
     </div>
   </footer>
