@@ -32,6 +32,10 @@ interface Settings {
   send_day: number;
   send_hour: number;
   send_minute: number;
+  auto_send: boolean;
+  require_approval: boolean;
+  timezone: string | null;
+  last_auto_run_at: string | null;
 }
 
 const dayNames = ["Söndag", "Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag"];
@@ -47,6 +51,8 @@ const Admin = () => {
   const [generating, setGenerating] = useState(false);
   const [sending, setSending] = useState<string | null>(null);
   const [subscriberCount, setSubscriberCount] = useState(0);
+  const [testEmail, setTestEmail] = useState("");
+  const [testing, setTesting] = useState<string | null>(null);
 
   // Check admin role
   useEffect(() => {
@@ -160,6 +166,38 @@ const Admin = () => {
       .eq("id", settings.id);
     setSettings({ ...settings, [field]: value });
     toast.success("Inställning sparad");
+  };
+
+  const updateFlag = async (field: "auto_send" | "require_approval", value: boolean) => {
+    if (!settings) return;
+    await supabase
+      .from("newsletter_settings" as any)
+      .update({ [field]: value, updated_by: user?.id } as any)
+      .eq("id", settings.id);
+    setSettings({ ...settings, [field]: value });
+    toast.success("Inställning sparad");
+  };
+
+  const sendTest = async (draftId: string) => {
+    const email = testEmail.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error("Ange en giltig e-postadress för testet");
+      return;
+    }
+    setTesting(draftId);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await supabase.functions.invoke("send-newsletter", {
+        body: { draftId, testEmail: email },
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      if (res.error) throw res.error;
+      toast.success(`Testmejl skickat till ${email}`);
+    } catch (e: any) {
+      toast.error(e.message || "Kunde inte skicka testmejl");
+    } finally {
+      setTesting(null);
+    }
   };
 
   if (authLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin w-8 h-8 text-primary" /></div>;
