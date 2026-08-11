@@ -1,5 +1,7 @@
 import RecipeForm from "@/components/RecipeForm";
 import RecipeShowcase from "@/components/RecipeShowcase";
+import Seo from "@/components/Seo";
+import SiteFooter from "@/components/SiteFooter";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -75,6 +77,52 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
+      <Seo
+        title="VeckansMatFynd – veckomeny för 4 personer under 500 kr"
+        description="Få en gratis veckomeny varje vecka: 5 middagar för 4 personer under 500 kr, byggd på veckans erbjudanden i ICA, Coop, Willys, Hemköp och Lidl."
+        path="/"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "VeckansMatFynd",
+            url: "/",
+            inLanguage: "sv-SE",
+            description:
+              "Veckomeny och billiga recept baserade på veckans erbjudanden i svenska matbutiker.",
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "Vad kostar VeckansMatFynd?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Tjänsten är gratis. Du får veckomenyn via e-post och kan avprenumerera med ett klick.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Hur mycket kostar veckans meny?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Vi bygger fem middagar för fyra personer för under 500 kronor totalt, baserat på veckans erbjudanden.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Vilka butiker används?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Erbjudanden hämtas från ICA, Coop, Willys, Hemköp och Lidl.",
+                },
+              },
+            ],
+          },
+        ]}
+      />
       {/* Animated gradient mesh background */}
       <div className="hero-mesh" aria-hidden="true" />
 
@@ -85,6 +133,16 @@ const Index = () => {
           <span className="hero-text-gradient">MatFynd</span>
         </span>
         <div className="flex gap-0.5 md:gap-1 shrink-0">
+          <Link to="/veckomeny" className="hidden sm:block">
+            <Button variant="ghost" size="sm" className="font-display text-sm text-muted-foreground hover:text-foreground">
+              Veckomeny
+            </Button>
+          </Link>
+          <Link to="/billiga-recept" className="hidden sm:block">
+            <Button variant="ghost" size="sm" className="font-display text-sm text-muted-foreground hover:text-foreground">
+              Billiga recept
+            </Button>
+          </Link>
           {user ? (
             <>
               <Link to="/saved">
