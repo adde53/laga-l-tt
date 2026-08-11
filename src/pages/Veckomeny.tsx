@@ -5,9 +5,10 @@ const Veckomeny = () => (
     path="/veckomeny"
     breadcrumbLabel="Veckomeny"
     title="Veckomeny för 4 personer – under 500 kr i veckan"
-    metaTitle="Veckomeny under 500 kr – 5 middagar för 4 personer"
-    metaDescription="Gratis veckomeny för familjen: 5 middagar, 4 portioner, under 500 kr totalt. Byggd på veckans erbjudanden i svenska matbutiker – med inköpslista."
-    updated="2026-02-17"
+    metaTitle="Veckomeny 2026 – 5 middagar för 4 personer under 500 kr | Gratis"
+    metaDescription="Gratis veckomeny för familjen: 5 middagar, 4 portioner, under 500 kr totalt. Byggd på veckans erbjudanden i ICA, Coop, Willys, Hemköp och Lidl – med inköpslista. Perfekt billig veckomatsedel för barnfamiljer."
+    metaKeywords="veckomeny, veckomeny billig, veckomeny familj, veckomeny 500 kr, billig veckomeny, veckomatsedel, gratis veckomeny, veckoplanering mat, veckomeny barn, veckomeny budget, veckomeny erbjudanden, billig veckomatsedel"
+    updated="2026-08-11"
     intro="En veckomeny sparar både pengar och tid: du handlar en gång, slänger mindre mat och slipper frågan 'vad ska vi äta?'. Så här bygger vi en balanserad meny för fyra personen på under 500 kronor – och hur du får den skickad till dig varje vecka."
     sections={[
       {
@@ -50,6 +51,20 @@ const Veckomeny = () => (
         q: "När skickas veckomenyn?",
         a: "En gång i veckan, inför veckans handling, så att du kan planera inköpen innan du går till butiken.",
       },
+      {
+        q: "Fungerar veckomeny för barnfamilj?",
+        a: "Ja, veckomenyn innehåller varierade rätter som passar de flesta familjer. Du kan ange 'barnvänligt' som preferens så anpassas recepten efter barns smak.",
+      },
+      {
+        q: "Vad är skillnaden mellan veckomeny och veckomatsedel?",
+        a: "Det är samma sak. Veckomeny och veckomatsedel används synonymt – båda betyder en planerad meny för en veckas måltider.",
+      },
+    ]}
+    relatedLinks={[
+      { to: "/billig-veckomatsedel", label: "Billig veckomatsedel för barnfamilj" },
+      { to: "/billiga-recept", label: "Billiga recept under 20 kr" },
+      { to: "/billig-mat", label: "Billig mat – komplett guide" },
+      { to: "/matlada-budget", label: "Matlådor på budget" },
     ]}
   />
 );

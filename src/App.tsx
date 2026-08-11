@@ -11,6 +11,8 @@ import Admin from "./pages/Admin";
 import Veckomeny from "./pages/Veckomeny";
 import BilligaRecept from "./pages/BilligaRecept";
 import MatladaBudget from "./pages/MatladaBudget";
+import BilligVeckomatsedel from "./pages/BilligVeckomatsedel";
+import BilligMat from "./pages/BilligMat";
 import Unsubscribe from "./pages/Unsubscribe";
 import NotFound from "./pages/NotFound";
 
@@ -31,6 +33,8 @@ const App = () => (
             <Route path="/veckomeny" element={<Veckomeny />} />
             <Route path="/billiga-recept" element={<BilligaRecept />} />
             <Route path="/matlada-budget" element={<MatladaBudget />} />
+            <Route path="/billig-veckomatsedel" element={<BilligVeckomatsedel />} />
+            <Route path="/billig-mat" element={<BilligMat />} />
             <Route path="/avprenumerera" element={<Unsubscribe />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

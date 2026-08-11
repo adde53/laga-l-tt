@@ -5,9 +5,10 @@ const BilligaRecept = () => (
     path="/billiga-recept"
     breadcrumbLabel="Billiga recept"
     title="Billiga recept – god vardagsmat för under 20 kr per portion"
-    metaTitle="Billiga recept – vardagsmat under 20 kr per portion"
-    metaDescription="Billiga recept som faktiskt smakar gott: så bygger du middagar för under 20 kr per portion med veckans erbjudanden, smarta basvaror och rätt teknik."
-    updated="2026-02-17"
+    metaTitle="Billiga recept 2026 – vardagsmat under 20 kr per portion"
+    metaDescription="Billiga recept som faktiskt smakar gott: middagar för under 20 kr per portion med veckans erbjudanden. Perfekt billig mat för familjer, studenter och alla med budget."
+    metaKeywords="billiga recept, billiga middagar, recept billigt, billiga recept familj, billiga recept student, budgetrecept, billig middag recept, recept under 20 kr, billig mat recept, enkel billig mat, snabba billiga recept"
+    updated="2026-08-11"
     intro="Billig mat blir tråkig när den bara handlar om att dra ner på råvaror. Blir den istället byggd runt några billiga basvaror och smaksättning som lyfter dem, hamnar du enkelt under 20 kronor per portion utan att maten känns snål."
     sections={[
       {
@@ -51,6 +52,16 @@ const BilligaRecept = () => (
         q: "Kan jag laga billigt vegetariskt?",
         a: "Ja, vegetariska middagar på linser, bönor eller ägg är oftast de billigaste rätterna i en veckomeny.",
       },
+      {
+        q: "Vilka billiga recept passar barnfamilj?",
+        a: "Köttfärssås med pasta, pannkakor, kycklinggryta, ugnsbakad korv med rotfrukter och enkel fisksoppa – rätter barnen gillar och som kostar under 25 kr per portion.",
+      },
+    ]}
+    relatedLinks={[
+      { to: "/billig-veckomatsedel", label: "Billig veckomatsedel" },
+      { to: "/billig-mat", label: "Billig mat – komplett guide" },
+      { to: "/veckomeny", label: "Veckomeny under 500 kr" },
+      { to: "/matlada-budget", label: "Matlådor på budget" },
     ]}
   />
 );

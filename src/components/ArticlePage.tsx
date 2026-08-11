@@ -20,11 +20,13 @@ interface ArticlePageProps {
   title: string;
   metaTitle: string;
   metaDescription: string;
+  metaKeywords?: string;
   intro: string;
   breadcrumbLabel: string;
   sections: ArticleSection[];
   faq: ArticleFaq[];
   updated: string;
+  relatedLinks?: { to: string; label: string }[];
 }
 
 const ArticlePage = ({
@@ -32,11 +34,13 @@ const ArticlePage = ({
   title,
   metaTitle,
   metaDescription,
+  metaKeywords,
   intro,
   breadcrumbLabel,
   sections,
   faq,
   updated,
+  relatedLinks,
 }: ArticlePageProps) => {
   const jsonLd = [
     {
@@ -71,7 +75,7 @@ const ArticlePage = ({
 
   return (
     <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
-      <Seo title={metaTitle} description={metaDescription} path={path} jsonLd={jsonLd} />
+      <Seo title={metaTitle} description={metaDescription} path={path} keywords={metaKeywords} jsonLd={jsonLd} />
       <div className="hero-mesh" aria-hidden="true" />
 
       <nav className="relative z-10 container max-w-3xl mx-auto px-5 pt-5 flex items-center justify-between">
@@ -147,6 +151,23 @@ const ArticlePage = ({
               ))}
             </dl>
           </section>
+
+          {relatedLinks && relatedLinks.length > 0 && (
+            <section className="space-y-3">
+              <h2 className="font-display text-xl font-bold text-foreground">Läs mer</h2>
+              <div className="flex flex-wrap gap-3">
+                {relatedLinks.map((rl) => (
+                  <Link
+                    key={rl.to}
+                    to={rl.to}
+                    className="rounded-full border border-primary/30 bg-primary/5 px-4 py-2 text-xs font-display font-bold text-foreground/70 hover:border-primary/60 transition-colors"
+                  >
+                    {rl.label} →
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
 
           <p className="text-xs text-muted-foreground/60 font-body">
             Uppdaterad {new Date(updated).toLocaleDateString("sv-SE", {

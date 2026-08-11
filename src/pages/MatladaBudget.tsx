@@ -5,9 +5,10 @@ const MatladaBudget = () => (
     path="/matlada-budget"
     breadcrumbLabel="Matlådor på budget"
     title="Matlådor på budget – en förmiddag, en veckas luncher"
-    metaTitle="Matlådor på budget – billiga luncher för hela veckan"
-    metaDescription="Laga matlådor på budget: fem billiga luncher från en och samma matlagning, med rätter som håller sig i kylen och kostar under 20 kr per portion."
-    updated="2026-02-17"
+    metaTitle="Matlådor på budget 2026 – billiga luncher för hela veckan"
+    metaDescription="Laga matlådor på budget: fem billiga luncher från en matlagning, rätter som håller sig i kylen och kostar under 20 kr per portion. Billig mat för hela veckan."
+    metaKeywords="matlådor budget, billiga matlådor, matlåda recept billigt, billiga luncher, meal prep billigt, matlåda vecka, matlåda student, billig lunch, matlåda familj, spara pengar mat"
+    updated="2026-08-11"
     intro="Lunch ute kostar snabbt över tusen kronor i månaden. Med en matlagningsomgång i veckan landar samma luncher på en bråkdel – förutsatt att du väljer rätter som faktiskt är lika goda dag tre som dag ett."
     sections={[
       {
@@ -50,6 +51,12 @@ const MatladaBudget = () => (
         q: "Fungerar matlådor med veckomenyn?",
         a: "Bra ihop faktiskt – laga dubbel portion av veckomenyns middagar och du har lunchen klar utan extra matlagning.",
       },
+    ]}
+    relatedLinks={[
+      { to: "/billig-veckomatsedel", label: "Billig veckomatsedel" },
+      { to: "/billiga-recept", label: "Billiga recept under 20 kr" },
+      { to: "/billig-mat", label: "Billig mat – komplett guide" },
+      { to: "/veckomeny", label: "Veckomeny under 500 kr" },
     ]}
   />
 );

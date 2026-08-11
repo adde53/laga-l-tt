@@ -78,18 +78,37 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       <Seo
-        title="VeckansMatFynd – veckomeny för 4 personer under 500 kr"
-        description="Få en gratis veckomeny varje vecka: 5 middagar för 4 personer under 500 kr, byggd på veckans erbjudanden i ICA, Coop, Willys, Hemköp och Lidl."
+        title="VeckansMatFynd – billig veckomatsedel & veckomeny under 500 kr"
+        description="Gratis billig veckomatsedel varje vecka: 5 middagar för 4 personer under 500 kr. Billig mat baserad på erbjudanden i ICA, Coop, Willys, Hemköp och Lidl. Perfekt för barnfamiljer."
         path="/"
+        keywords="billig veckomatsedel, veckomatsedel, billig mat, veckomeny, billiga recept, billig veckomatsedel barnfamilj, billig middag, veckomeny familj, billig mat recept, budgetrecept, veckans erbjudanden, matbudget"
         jsonLd={[
           {
             "@context": "https://schema.org",
             "@type": "WebSite",
             name: "VeckansMatFynd",
-            url: "/",
+            url: "https://www.veckansmatfynd.se",
             inLanguage: "sv-SE",
             description:
-              "Veckomeny och billiga recept baserade på veckans erbjudanden i svenska matbutiker.",
+              "Billig veckomatsedel och billiga recept baserade på veckans erbjudanden i svenska matbutiker. Gratis veckomeny för barnfamiljer och studenter.",
+            potentialAction: {
+              "@type": "SearchAction",
+              target: "https://www.veckansmatfynd.se/?q={search_term_string}",
+              "query-input": "required name=search_term_string",
+            },
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "VeckansMatFynd",
+            url: "https://www.veckansmatfynd.se",
+            logo: "https://www.veckansmatfynd.se/favicon.ico",
+            sameAs: [],
+            contactPoint: {
+              "@type": "ContactPoint",
+              contactType: "customer service",
+              availableLanguage: "Swedish",
+            },
           },
           {
             "@context": "https://schema.org",
@@ -100,7 +119,7 @@ const Index = () => {
                 name: "Vad kostar VeckansMatFynd?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Tjänsten är gratis. Du får veckomenyn via e-post och kan avprenumerera med ett klick.",
+                  text: "Tjänsten är helt gratis. Du får en billig veckomatsedel via e-post och kan avprenumerera med ett klick.",
                 },
               },
               {
@@ -108,7 +127,7 @@ const Index = () => {
                 name: "Hur mycket kostar veckans meny?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Vi bygger fem middagar för fyra personer för under 500 kronor totalt, baserat på veckans erbjudanden.",
+                  text: "Vi bygger fem middagar för fyra personer för under 500 kronor totalt, baserat på veckans erbjudanden i ICA, Coop, Willys, Hemköp och Lidl.",
                 },
               },
               {
@@ -116,8 +135,55 @@ const Index = () => {
                 name: "Vilka butiker används?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Erbjudanden hämtas från ICA, Coop, Willys, Hemköp och Lidl.",
+                  text: "Erbjudanden hämtas från ICA, Coop, Willys, Hemköp och Lidl – Sveriges största matbutikskedjor.",
                 },
+              },
+              {
+                "@type": "Question",
+                name: "Fungerar det för barnfamiljer?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Ja! Vår billiga veckomatsedel är perfekt för barnfamiljer. Du kan ange 'barnvänligt' som preferens för att få recept som barn gillar.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Vad är en billig veckomatsedel?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "En billig veckomatsedel är en planerad meny för en hel veckas middagar, byggd för att hålla nere matkostnaderna genom att utgå från veckans erbjudanden och billiga basvaror.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Kan jag anpassa min veckomatsedel?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Ja. Välj antal dagar, budget, preferenser som vegetariskt, barnvänligt eller glutenfritt – och du får en anpassad billig veckomatsedel på sekunder.",
+                },
+              },
+            ],
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "HowTo",
+            name: "Så skapar du en billig veckomatsedel",
+            description: "Skapa en billig veckomatsedel med VeckansMatFynd på under en minut.",
+            step: [
+              {
+                "@type": "HowToStep",
+                name: "Välj dagar och budget",
+                text: "Ange vilka dagar du vill ha recept för och din veckobudget för mat.",
+              },
+              {
+                "@type": "HowToStep",
+                name: "Ange preferenser",
+                text: "Välj matpreferenser som barnvänligt, vegetariskt, snabbt eller specifika ingredienser.",
+              },
+              {
+                "@type": "HowToStep",
+                name: "Få din veckomatsedel",
+                text: "Få en komplett billig veckomatsedel med recept och inköpslista baserad på veckans erbjudanden.",
               },
             ],
           },
@@ -136,6 +202,11 @@ const Index = () => {
           <Link to="/veckomeny" className="hidden sm:block">
             <Button variant="ghost" size="sm" className="font-display text-sm text-muted-foreground hover:text-foreground">
               Veckomeny
+            </Button>
+          </Link>
+          <Link to="/billig-veckomatsedel" className="hidden sm:block">
+            <Button variant="ghost" size="sm" className="font-display text-sm text-muted-foreground hover:text-foreground">
+              Veckomatsedel
             </Button>
           </Link>
           <Link to="/billiga-recept" className="hidden sm:block">
@@ -353,7 +424,7 @@ const Index = () => {
           <div className="flex items-center gap-4">
             <div className="flex-1 h-px bg-border" />
             <h2 className="font-display text-lg font-bold hero-text-gradient whitespace-nowrap">
-              Billiga recept som faktiskt smakar gott
+              Billig veckomatsedel & recept som smakar gott
             </h2>
             <div className="flex-1 h-px bg-border" />
           </div>
@@ -361,23 +432,23 @@ const Index = () => {
             {[
               {
                 icon: <ShoppingBagIllustration size={28} className="text-primary" />,
-                title: "Spara pengar på maten",
-                text: "VeckansMatFynd hjälper dig att planera veckans måltider baserat på aktuella erbjudanden från ICA, Coop, Willys, Hemköp och Lidl.",
+                title: "Billig veckomatsedel varje vecka",
+                text: "Få en komplett billig veckomatsedel baserad på veckans erbjudanden från ICA, Coop, Willys, Hemköp och Lidl. Perfekt för barnfamiljer som vill spara på maten.",
               },
               {
                 icon: <MagicWandIllustration size={28} className="text-secondary" />,
-                title: "Riktiga recept & AI-genererade",
-                text: "Vi blandar noggrant utvalda recept från populära svenska matsidor med AI-genererade recept anpassade efter din budget.",
+                title: "Billiga recept & AI-genererade",
+                text: "Billiga recept från populära svenska matsidor kombinerade med AI-genererade förslag. Alltid under 20 kr per portion, alltid goda.",
               },
               {
                 icon: <PotIllustration size={28} className="text-accent-foreground" />,
-                title: "Perfekt för studenter & familjer",
-                text: "Oavsett om du är student med tight budget eller en familj – VeckansMatFynd skapar recept anpassade efter din situation.",
+                title: "Billig mat för alla",
+                text: "Oavsett om du är student med tight budget eller en barnfamilj – vi skapar billig mat anpassad efter din situation och plånbok.",
               },
               {
                 icon: <QuickTimeIllustration size={28} className="text-primary" />,
                 title: "Veckomeny på minuter",
-                text: "Välj vilka dagar du vill ha recept för, ange din budget och vilken mat du gillar. Klart på sekunder.",
+                text: "Välj dagar, budget och matpreferenser. Få en komplett veckomeny med inköpslista och billiga recept på sekunder.",
               },
             ].map((item, i) => (
               <article key={i} className="seo-card">
@@ -387,12 +458,36 @@ const Index = () => {
               </article>
             ))}
           </div>
+
+          {/* Extra SEO text block */}
+          <div className="max-w-3xl mx-auto space-y-4 text-xs text-muted-foreground/60">
+            <h3 className="font-display text-sm font-bold text-foreground/60">Billig veckomatsedel för barnfamilj</h3>
+            <p>
+              En billig veckomatsedel sparar barnfamiljer tusenlappar varje månad. Istället för att handla planlöst och dyrt
+              bygger VeckansMatFynd din veckomatsedel runt veckans lägsta priser. Fem middagar, fyra portioner, under 500 kronor –
+              med inköpslista. Billig mat behöver inte vara tråkig: vi varierar mellan kött, kyckling, fisk och vegetariskt
+              så att hela familjen äter gott varje dag.
+            </p>
+            <h3 className="font-display text-sm font-bold text-foreground/60">Billig mat med veckans erbjudanden</h3>
+            <p>
+              Hemligheten bakom riktigt billig mat är att handla efter vad som är billigt – inte efter en önskelista.
+              VeckansMatFynd läser automatiskt veckans erbjudanden och bygger billiga recept runt de råvarorna.
+              Resultatet: en veckomeny som kostar en bråkdel av vad planlös mathandling kostar.
+            </p>
+          </div>
+
           <div className="flex flex-wrap justify-center gap-3 pt-2">
+            <Link to="/billig-veckomatsedel" className="rounded-full border border-primary/30 bg-primary/5 px-4 py-2 text-xs font-display font-bold text-foreground/70 hover:border-primary/60 transition-colors">
+              Billig veckomatsedel →
+            </Link>
             <Link to="/veckomeny" className="rounded-full border border-primary/30 bg-primary/5 px-4 py-2 text-xs font-display font-bold text-foreground/70 hover:border-primary/60 transition-colors">
               Veckomeny under 500 kr →
             </Link>
             <Link to="/billiga-recept" className="rounded-full border border-primary/30 bg-primary/5 px-4 py-2 text-xs font-display font-bold text-foreground/70 hover:border-primary/60 transition-colors">
               Billiga recept per portion →
+            </Link>
+            <Link to="/billig-mat" className="rounded-full border border-primary/30 bg-primary/5 px-4 py-2 text-xs font-display font-bold text-foreground/70 hover:border-primary/60 transition-colors">
+              Billig mat – guide →
             </Link>
             <Link to="/matlada-budget" className="rounded-full border border-primary/30 bg-primary/5 px-4 py-2 text-xs font-display font-bold text-foreground/70 hover:border-primary/60 transition-colors">
               Matlådor på budget →
