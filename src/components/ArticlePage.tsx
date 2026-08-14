@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Seo from "@/components/Seo";
 import SiteFooter from "@/components/SiteFooter";
+import SiteHeader from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 
@@ -78,15 +79,7 @@ const ArticlePage = ({
       <Seo title={metaTitle} description={metaDescription} path={path} keywords={metaKeywords} jsonLd={jsonLd} />
       <div className="hero-mesh" aria-hidden="true" />
 
-      <nav className="relative z-10 container max-w-3xl mx-auto px-5 pt-5 flex items-center justify-between">
-        <Link to="/" className="font-display text-lg font-bold tracking-tight">
-          <span className="text-foreground">Veckans</span>
-          <span className="hero-text-gradient">MatFynd</span>
-        </Link>
-        <Link to="/">
-          <Button size="sm" className="font-display font-bold">Skapa recept</Button>
-        </Link>
-      </nav>
+      <SiteHeader />
 
       <main className="relative z-10 flex-1 container max-w-3xl mx-auto px-5 py-10 md:py-14">
         <ol className="flex items-center gap-1 text-xs text-muted-foreground/70 font-body mb-5">

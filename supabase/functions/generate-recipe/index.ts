@@ -95,13 +95,13 @@ ${craving ? `Användaren är sugen på: ${craving}` : "Inget speciellt önskemå
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Krediter slut, ladda på i inställningarna." }), {
+        return new Response(JSON.stringify({ error: "Receptskaparen är tillfälligt otillgänglig, försök igen senare." }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      return new Response(JSON.stringify({ error: "AI-fel, försök igen." }), {
+      console.error("Recipe gateway error:", response.status, t);
+      return new Response(JSON.stringify({ error: "Kunde inte skapa recept just nu, försök igen." }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -6,6 +6,7 @@ import RecipeResult from "./RecipeResult";
 import ShoppingList from "./ShoppingList";
 import CuisineSelector from "./CuisineSelector";
 import DaySelector from "./DaySelector";
+import StoreLocationPicker, { StoreLocation } from "./StoreLocationPicker";
 import { ChefHat, Sparkles, CalendarDays, Loader2, History, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -17,7 +18,6 @@ const STORES = [
   { value: "lidl", label: "Lidl" },
   { value: "hemkop", label: "Hemköp" },
   { value: "citygross", label: "City Gross" },
-  { value: "netto", label: "Netto" },
 ];
 
 interface HistoryEntry {
@@ -31,7 +31,25 @@ interface HistoryEntry {
   timestamp: number;
 }
 
+/** Kedjor där erbjudandena skiljer sig mellan butiker. */
+const STORE_HAS_LOCAL_PRICES = new Set(["ica", "willys", "hemkop"]);
+
 const MAX_HISTORY = 5;
+
+/**
+ * Rubriker för de två receptkällorna i resultatet. De används både som
+ * synlig text och som avgränsare när ett halvfärdigt avsnitt måste tas
+ * bort, så de får inte skrivas ut som lösa strängar på flera ställen.
+ */
+const HEADING_WEB = "# 📖 Recept från svenska matsidor";
+const HEADING_PERSONAL = "# 👩‍🍳 Recept skapade för dig";
+
+/** Erbjudanden cachade i sessionStorage under sidbesöket. */
+interface CachedDeals {
+  text: string;
+  count: number;
+  storeName: string;
+}
 
 const getHistory = (): HistoryEntry[] => {
   try {
@@ -49,7 +67,26 @@ const RecipeForm = () => {
   const [dealsText, setDealsText] = useState("");
   const [craving, setCraving] = useState("");
   const [budget, setBudget] = useState("100");
-  const [store, setStore] = useState("none");
+  // Kedja + butik sparas tillsammans, annars riskerar vi att skicka ett
+  // Willys-butiks-ID till ICA vid nästa besök.
+  const savedStorePreference = (() => {
+    try {
+      const raw = localStorage.getItem("storePreference");
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return parsed?.chain && parsed?.location ? parsed : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const [store, setStore] = useState(savedStorePreference?.chain ?? "none");
+  const [storeLocation, setStoreLocation] = useState<StoreLocation | null>(
+    savedStorePreference?.location ?? null,
+  );
+  const [dealCount, setDealCount] = useState(0);
+  // Butiken som erbjudandena faktiskt kom ifrån, enligt servern.
+  const [dealsStoreName, setDealsStoreName] = useState("");
   const [mode, setMode] = useState<"single" | "weekly">("single");
   const [cuisines, setCuisines] = useState<string[]>([]);
   const [selectedDays, setSelectedDays] = useState<string[]>(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]);
@@ -60,7 +97,7 @@ const RecipeForm = () => {
   const [dealsLoaded, setDealsLoaded] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const [dealsCache, setDealsCache] = useState<Record<string, string>>(() => {
+  const [dealsCache, setDealsCache] = useState<Record<string, CachedDeals>>(() => {
     try { return JSON.parse(sessionStorage.getItem("dealsCache") || "{}"); } catch { return {}; }
   });
 
@@ -83,11 +120,20 @@ const RecipeForm = () => {
     setHistory(getHistory());
   }, []);
 
-  const fetchDeals = async (storeKey: string) => {
+  const fetchDeals = async (storeKey: string, location: StoreLocation | null) => {
     if (storeKey === "none") return;
+
+    // Cachen måste vara nyckelad på både kedja och vald butik – annars visas
+    // en annan butiks priser när användaren byter butik.
+    const cacheKey = location ? `${storeKey}:${location.id}` : storeKey;
+
     // Check cache first
-    if (dealsCache[storeKey]) {
-      setDealsText((prev) => prev ? prev + "\n\n---\n\n" + dealsCache[storeKey] : dealsCache[storeKey]);
+    const hit = dealsCache[cacheKey];
+    if (hit) {
+      // Ersätt – annars ligger föregående butiks priser kvar och ger fel recept.
+      setDealsText(hit.text);
+      setDealCount(hit.count);
+      setDealsStoreName(hit.storeName);
       setDealsLoaded(true);
       toast.success("Erbjudanden laddade från cache! 🎉");
       return;
@@ -102,18 +148,35 @@ const RecipeForm = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ store: storeKey }),
+          body: JSON.stringify({
+            store: storeKey,
+            storeId: location?.id,
+            storeName: location?.name,
+          }),
         }
       );
       const data = await resp.json();
       if (data.success && data.text) {
-        setDealsText((prev) => prev ? prev + "\n\n---\n\n" + data.text : data.text);
+        setDealsText(data.text);
         setDealsLoaded(true);
+        setDealCount(Array.isArray(data.deals) ? data.deals.length : 0);
+        setDealsStoreName(data.storeName || "");
         // Cache it
-        const newCache = { ...dealsCache, [storeKey]: data.text };
+        const newCache = {
+          ...dealsCache,
+          [cacheKey]: {
+            text: data.text,
+            count: Array.isArray(data.deals) ? data.deals.length : 0,
+            storeName: data.storeName || "",
+          },
+        };
         setDealsCache(newCache);
         sessionStorage.setItem("dealsCache", JSON.stringify(newCache));
-        toast.success("Erbjudanden hämtade! 🎉");
+        toast.success(
+          data.deals?.length
+            ? `${data.deals.length} erbjudanden hämtade! 🎉`
+            : "Erbjudanden hämtade! 🎉"
+        );
       } else {
         toast.error(data.error || "Kunde inte hämta erbjudanden");
       }
@@ -124,13 +187,40 @@ const RecipeForm = () => {
     }
   };
 
-  // Auto-fetch deals when store changes
+  // Auto-fetch deals when the chain or the selected local store changes
   useEffect(() => {
     if (store !== "none") {
       setDealsLoaded(false);
-      fetchDeals(store);
+      setDealCount(0);
+      fetchDeals(store, storeLocation);
+    } else {
+      // Ingen butik vald – släng erbjudandena så de inte påverkar receptet.
+      setDealsText("");
+      setDealsLoaded(false);
+      setDealCount(0);
+    }
+  }, [store, storeLocation]);
+
+  // Nollställ vald butik när användaren byter kedja, så att t.ex. ett Willys-ID
+  // aldrig skickas med när ICA är valt.
+  const previousChain = useRef(store);
+  useEffect(() => {
+    if (previousChain.current !== store) {
+      previousChain.current = store;
+      setStoreLocation(null);
+      localStorage.removeItem("storePreference");
     }
   }, [store]);
+
+  // Kom ihåg användarens butik till nästa besök
+  useEffect(() => {
+    if (storeLocation && store !== "none") {
+      localStorage.setItem(
+        "storePreference",
+        JSON.stringify({ chain: store, location: storeLocation }),
+      );
+    }
+  }, [storeLocation, store]);
 
   const dayNames: Record<string, string> = {
     monday: "Måndag", tuesday: "Tisdag", wednesday: "Onsdag", thursday: "Torsdag",
@@ -179,8 +269,8 @@ const RecipeForm = () => {
         const shuffled = [...selectedDays].sort(() => Math.random() - 0.5);
         const webDays = shuffled.slice(0, Math.max(1, Math.floor(selectedDays.length / 2)));
         
-        toast.info(`🔍 Söker riktiga recept för ${webDays.map(d => dayNames[d]).join(", ")}...`);
-        
+        toast.info(`🔍 Söker recept från matsidor för ${webDays.map(d => dayNames[d]).join(", ")}...`);
+
         const webResults = await Promise.all(
           webDays.map(async (day) => ({ day, recipe: await fetchWebRecipe(day) }))
         );
@@ -190,19 +280,19 @@ const RecipeForm = () => {
         }
 
         if (Object.keys(webRecipes).length > 0) {
-          toast.success(`📖 ${Object.keys(webRecipes).length} riktiga recept hittade!`);
+          toast.success(`📖 ${Object.keys(webRecipes).length} recept hittade från matsidor!`);
         }
       }
 
-      // Determine which days the AI should generate for
-      const aiDays = mode === "weekly" 
+      // Vilka dagar som ska få ett recept skapat åt sig
+      const personalDays = mode === "weekly"
         ? selectedDays.filter(d => !webRecipes[d])
         : selectedDays;
 
       // Show web recipes first
       let accumulated = "";
       if (Object.keys(webRecipes).length > 0) {
-        accumulated = "# 📖 Riktiga recept från webben\n\n";
+        accumulated = `${HEADING_WEB}\n\n`;
         for (const day of selectedDays) {
           if (webRecipes[day]) {
             accumulated += webRecipes[day] + "\n\n---\n\n";
@@ -211,14 +301,13 @@ const RecipeForm = () => {
         setResult(accumulated);
       }
 
-      // If there are AI days to generate (or single mode)
-      if (aiDays.length > 0 || mode === "single") {
+      // Återstående dagar får ett recept skapat utifrån butik och budget
+      if (personalDays.length > 0 || mode === "single") {
         if (Object.keys(webRecipes).length > 0) {
-          accumulated += "# 🤖 AI-genererade recept\n\n";
+          accumulated += `${HEADING_PERSONAL}\n\n`;
           setResult(accumulated);
         }
 
-        let aiSucceeded = false;
         try {
           const resp = await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-recipe`,
@@ -230,15 +319,15 @@ const RecipeForm = () => {
               },
               body: JSON.stringify({ 
                 pdfText: dealsText, craving, budget, mode, store, cuisines, 
-                selectedDays: mode === "weekly" ? aiDays : selectedDays, 
-                portions 
+                selectedDays: mode === "weekly" ? personalDays : selectedDays,
+                portions
               }),
             }
           );
 
           if (!resp.ok || !resp.body) {
             const errData = await resp.json().catch(() => ({}));
-            throw new Error(errData.error || "AI-fel");
+            throw new Error(errData.error || "Kunde inte skapa recept");
           }
 
           const reader = resp.body.getReader();
@@ -272,18 +361,17 @@ const RecipeForm = () => {
               }
             }
           }
-          aiSucceeded = true;
-        } catch (aiError) {
-          console.error("AI failed, falling back to web recipes:", aiError);
-          toast.error("AI krånglar – hämtar recept från webben istället! 🔄");
+        } catch (recipeError) {
+          console.error("Recipe generation failed, falling back to web recipes:", recipeError);
+          toast.error("Det krånglar just nu – hämtar recept från matsidor istället! 🔄");
 
-          // Remove any partial AI header
-          if (accumulated.includes("# 🤖 AI-genererade recept")) {
-            accumulated = accumulated.replace("# 🤖 AI-genererade recept\n\n", "");
+          // Ta bort en påbörjad rubrik som aldrig fick något innehåll
+          if (accumulated.includes(HEADING_PERSONAL)) {
+            accumulated = accumulated.replace(`${HEADING_PERSONAL}\n\n`, "");
           }
 
           // Fallback: fetch all remaining days from web
-          const fallbackDays = mode === "single" ? ["single"] : aiDays;
+          const fallbackDays = mode === "single" ? ["single"] : personalDays;
           const fallbackResults = await Promise.all(
             fallbackDays.map(async (day) => ({
               day,
@@ -293,16 +381,16 @@ const RecipeForm = () => {
 
           const fallbackFound = fallbackResults.filter(r => r.recipe);
           if (fallbackFound.length > 0) {
-            if (!accumulated.includes("📖")) {
-              accumulated += "# 📖 Recept från webben\n\n";
+            if (!accumulated.includes(HEADING_WEB)) {
+              accumulated += `${HEADING_WEB}\n\n`;
             }
             for (const { recipe } of fallbackFound) {
               accumulated += recipe + "\n\n---\n\n";
             }
             setResult(accumulated);
-            toast.success(`📖 ${fallbackFound.length} recept hämtade från webben!`);
+            toast.success(`📖 ${fallbackFound.length} recept hämtade från matsidor!`);
           } else {
-            throw new Error("Kunde varken nå AI eller hitta recept på webben. Försök igen!");
+            throw new Error("Kunde inte hitta några recept just nu. Försök igen!");
           }
         }
       }
@@ -392,13 +480,35 @@ const RecipeForm = () => {
         </div>
       </div>
 
+      {/* Lokal butik – ger exakta priser för användarens egen butik */}
+      <StoreLocationPicker
+        chain={store}
+        value={storeLocation}
+        onChange={setStoreLocation}
+      />
+
       {/* Deals loading status */}
       {store !== "none" && (isFetchingDeals || dealsLoaded) && (
-        <div className="animate-fade-in-up text-sm font-display font-semibold flex items-center gap-2 px-1">
+        <div className="animate-fade-in-up text-sm font-display px-1">
           {isFetchingDeals ? (
-            <><Loader2 className="w-4 h-4 animate-spin text-primary" /> Hämtar erbjudanden...</>
+            <span className="font-semibold flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin text-primary" /> Hämtar erbjudanden...
+            </span>
           ) : (
-            <span className="text-secondary">✅ Erbjudanden hämtade</span>
+            <div className="space-y-1">
+              <span className="text-secondary font-semibold block">
+                ✅ {dealCount > 0 ? `${dealCount} erbjudanden` : "Erbjudanden"} hämtade
+                {dealsStoreName ? ` från ${dealsStoreName}` : ""}
+              </span>
+              {/* Utan valt läge visas kedjans standardbutik – säg det rakt ut,
+                  annars tror man att priserna gäller den egna butiken. */}
+              {!storeLocation && STORE_HAS_LOCAL_PRICES.has(store) && (
+                <span className="text-muted-foreground font-body text-xs block">
+                  Det här är en standardbutik. Välj din butik ovan för priser som
+                  stämmer där du handlar.
+                </span>
+              )}
+            </div>
           )}
         </div>
       )}

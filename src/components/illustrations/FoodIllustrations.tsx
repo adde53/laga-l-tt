@@ -87,7 +87,7 @@ export const ShoppingBagIllustration = ({ size = 32, className, ...props }: Illu
   </svg>
 );
 
-/** A sparkle/magic wand for AI */
+/** A sparkle/magic wand for personalised recipes */
 export const MagicWandIllustration = ({ size = 32, className, ...props }: IllustrationProps) => (
   <svg {...defaults(size)} className={className} {...props}>
     {/* Wand */}

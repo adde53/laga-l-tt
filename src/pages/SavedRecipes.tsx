@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2, ArrowLeft, Search } from "lucide-react";
 import { Link } from "react-router-dom";
+import SiteHeader from "@/components/SiteHeader";
 import { toast } from "sonner";
 
 interface SavedRecipe {
@@ -116,6 +117,7 @@ const SavedRecipes = () => {
 
   return (
     <div className="page-shell min-h-screen">
+      <SiteHeader />
       <div className="container max-w-xl mx-auto px-5 py-8">
         <div className="flex items-center gap-3 mb-4">
           <Link to="/">

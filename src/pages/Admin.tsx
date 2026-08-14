@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Link, Navigate } from "react-router-dom";
+import SiteHeader from "@/components/SiteHeader";
 import {
   ArrowLeft, Send, FileEdit, CheckCircle, XCircle, RefreshCw,
   Loader2, Shield, Calendar, Clock, Mail
@@ -204,12 +205,15 @@ const Admin = () => {
   if (!user) return <Navigate to="/auth" replace />;
   if (isAdmin === null) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin w-8 h-8 text-primary" /></div>;
   if (!isAdmin) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center space-y-4">
-        <Shield className="w-16 h-16 text-destructive mx-auto" />
-        <h1 className="font-display text-2xl font-bold">Ingen åtkomst</h1>
-        <p className="text-muted-foreground">Du har inte administratörsrättigheter.</p>
-        <Link to="/"><Button variant="outline">Tillbaka till startsidan</Button></Link>
+    <div className="min-h-screen bg-background flex flex-col">
+      <SiteHeader />
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Shield className="w-16 h-16 text-destructive mx-auto" />
+          <h1 className="font-display text-2xl font-bold">Ingen åtkomst</h1>
+          <p className="text-muted-foreground">Du har inte administratörsrättigheter.</p>
+          <Link to="/"><Button variant="outline">Tillbaka till startsidan</Button></Link>
+        </div>
       </div>
     </div>
   );
@@ -218,6 +222,7 @@ const Admin = () => {
   if (editingDraft) {
     return (
       <div className="min-h-screen bg-background">
+        <SiteHeader />
         <div className="container max-w-4xl mx-auto px-5 py-8">
           <Button variant="ghost" onClick={() => setEditingDraft(null)} className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" /> Tillbaka
@@ -307,6 +312,7 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SiteHeader />
       <div className="container max-w-4xl mx-auto px-5 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">

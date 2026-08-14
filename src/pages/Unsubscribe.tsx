@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Seo from "@/components/Seo";
 import SiteFooter from "@/components/SiteFooter";
+import SiteHeader from "@/components/SiteHeader";
 import { Loader2, MailX, CheckCircle, AlertCircle } from "lucide-react";
 
 const FUNCTIONS_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/newsletter-unsubscribe`;
@@ -87,6 +88,7 @@ const Unsubscribe = () => {
         noindex
       />
       <div className="hero-mesh" aria-hidden="true" />
+      <SiteHeader />
 
       <main className="flex-1 relative z-10 container max-w-lg mx-auto px-5 py-20">
         <div className="rounded-2xl border bg-card p-8 text-center space-y-4 shadow-md">

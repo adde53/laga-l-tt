@@ -17,3 +17,10 @@ verify_jwt = false
 
 [functions.newsletter-unsubscribe]
 verify_jwt = false
+
+[functions.fetch-store-deals]
+verify_jwt = false
+
+[functions.refresh-store-deals]
+verify_jwt = false
+

@@ -2,13 +2,14 @@ import RecipeForm from "@/components/RecipeForm";
 import RecipeShowcase from "@/components/RecipeShowcase";
 import Seo from "@/components/Seo";
 import SiteFooter from "@/components/SiteFooter";
-import { useState, useEffect } from "react";
+import SiteHeader from "@/components/SiteHeader";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
-import { BookOpen, LogIn, LogOut, Mail, CheckCircle, Utensils, Settings } from "lucide-react";
+import { BookOpen, LogIn, Mail, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
   PotIllustration,
@@ -22,26 +23,10 @@ import {
 } from "@/components/illustrations/FoodIllustrations";
 
 const Index = () => {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const [nlEmail, setNlEmail] = useState("");
   const [nlLoading, setNlLoading] = useState(false);
   const [nlDone, setNlDone] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .then(({ data }) => {
-          setIsAdmin(!!data && data.length > 0);
-        });
-    } else {
-      setIsAdmin(false);
-    }
-  }, [user]);
 
   const scrollToForm = () => {
     document.getElementById("recipe-form")?.scrollIntoView({ behavior: "smooth" });
@@ -193,54 +178,7 @@ const Index = () => {
       <div className="hero-mesh" aria-hidden="true" />
 
       {/* Nav */}
-      <nav className="relative z-10 container max-w-6xl mx-auto px-4 pt-4 md:px-5 md:pt-5 flex items-center justify-between gap-2">
-        <span className="font-display text-xl font-bold tracking-tight">
-          <span className="text-foreground">Veckans</span>
-          <span className="hero-text-gradient">MatFynd</span>
-        </span>
-        <div className="flex gap-0.5 md:gap-1 shrink-0">
-          <Link to="/veckomeny" className="hidden sm:block">
-            <Button variant="ghost" size="sm" className="font-display text-sm text-muted-foreground hover:text-foreground">
-              Veckomeny
-            </Button>
-          </Link>
-          <Link to="/billig-veckomatsedel" className="hidden sm:block">
-            <Button variant="ghost" size="sm" className="font-display text-sm text-muted-foreground hover:text-foreground">
-              Veckomatsedel
-            </Button>
-          </Link>
-          <Link to="/billiga-recept" className="hidden sm:block">
-            <Button variant="ghost" size="sm" className="font-display text-sm text-muted-foreground hover:text-foreground">
-              Billiga recept
-            </Button>
-          </Link>
-          {user ? (
-            <>
-              <Link to="/saved">
-                <Button variant="ghost" size="sm" className="font-display text-sm gap-1.5 text-muted-foreground hover:text-foreground">
-                  <BookOpen className="w-4 h-4" /> Mina recept
-                </Button>
-              </Link>
-              {isAdmin && (
-                <Link to="/admin">
-                  <Button variant="ghost" size="sm" className="font-display text-sm gap-1.5 text-muted-foreground hover:text-foreground">
-                    <Settings className="w-4 h-4" /> Admin
-                  </Button>
-                </Link>
-              )}
-              <Button variant="ghost" size="sm" className="font-display text-sm gap-1.5 text-muted-foreground hover:text-foreground" onClick={signOut}>
-                <LogOut className="w-4 h-4" /> Logga ut
-              </Button>
-            </>
-          ) : (
-            <Link to="/auth">
-              <Button variant="ghost" size="sm" className="font-display text-sm gap-1.5 text-muted-foreground hover:text-foreground">
-                <LogIn className="w-4 h-4" /> Logga in
-              </Button>
-            </Link>
-          )}
-        </div>
-      </nav>
+      <SiteHeader />
 
       {/* Hero – full viewport */}
       <header className="relative z-10 container max-w-6xl mx-auto px-5 pt-12 pb-6 md:pt-20 md:pb-12 lg:pt-28 lg:pb-16">
@@ -303,8 +241,8 @@ const Index = () => {
               </div>
               <div className="bento-card bento-card-mint">
                 <MagicWandIllustration size={36} className="text-secondary" />
-                <h3 className="font-display font-bold text-sm text-foreground">AI + riktiga recept</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">Mix av webrecept och AI-genererade förslag</p>
+                <h3 className="font-display font-bold text-sm text-foreground">Personliga recept</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Anpassade efter din smak, din budget och din butik</p>
               </div>
               <div className="bento-card bento-card-sunny">
                 <CoinIllustration size={36} className="text-accent-foreground" />
@@ -328,7 +266,7 @@ const Index = () => {
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
           {[
             { icon: <ShoppingBagIllustration size={20} className="text-primary" />, label: "Erbjudanden" },
-            { icon: <MagicWandIllustration size={20} className="text-secondary" />, label: "AI-recept" },
+            { icon: <MagicWandIllustration size={20} className="text-secondary" />, label: "Personligt" },
             { icon: <CoinIllustration size={20} className="text-accent-foreground" />, label: "Budget" },
             { icon: <QuickTimeIllustration size={20} className="text-primary" />, label: "Snabbt" },
           ].map((f, i) => (
@@ -437,8 +375,8 @@ const Index = () => {
               },
               {
                 icon: <MagicWandIllustration size={28} className="text-secondary" />,
-                title: "Billiga recept & AI-genererade",
-                text: "Billiga recept från populära svenska matsidor kombinerade med AI-genererade förslag. Alltid under 20 kr per portion, alltid goda.",
+                title: "Billiga recept, personligt anpassade",
+                text: "Recept från populära svenska matsidor tillsammans med förslag som anpassas efter din smak, din budget och din butik. Alltid under 20 kr per portion, alltid goda.",
               },
               {
                 icon: <PotIllustration size={28} className="text-accent-foreground" />,

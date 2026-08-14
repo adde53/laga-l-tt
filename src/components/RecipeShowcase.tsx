@@ -60,7 +60,7 @@ const RecipeCard = ({ recipe, index, onClick }: { recipe: FeaturedRecipe; index:
       <div className="absolute top-3 right-3 z-10">
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-display font-bold bg-primary/15 text-primary border border-primary/20">
           <Sparkles className="w-2.5 h-2.5" />
-          AI-recept
+          Utvalt
         </span>
       </div>
 
@@ -152,7 +152,7 @@ const RecipeDetailDialog = ({ recipe, open, onClose }: { recipe: FeaturedRecipe 
             )}
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-display font-bold bg-primary/15 text-primary border border-primary/20">
               <Sparkles className="w-2.5 h-2.5" />
-              AI-recept
+              Utvalt
             </span>
           </div>
           <div className="flex items-center justify-between">
