@@ -20,19 +20,18 @@ const NewsletterSignup = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from("newsletter_subscribers" as any)
-        .insert({ email: trimmed } as any);
+      const { data, error } = await supabase.functions.invoke("newsletter-subscribe", {
+        body: { email: trimmed },
+      });
 
-      if (error) {
-        if (error.code === "23505") {
-          toast.info("Du prenumererar redan! 🎉");
-          setSubscribed(true);
-        } else {
-          throw error;
-        }
+      if (error) throw error;
+
+      setSubscribed(true);
+      if (data?.alreadySubscribed) {
+        toast.info("Du prenumererar redan! 🎉");
+      } else if (data?.emailSent) {
+        toast.success("Välkommen! Ett bekräftelsemejl är på väg 📬");
       } else {
-        setSubscribed(true);
         toast.success("Välkommen! Du får ditt första veckobrev nästa måndag 🎉");
       }
     } catch (err) {
