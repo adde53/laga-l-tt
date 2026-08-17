@@ -203,6 +203,105 @@ export type Database = {
         }
         Relationships: []
       }
+      store_deals: {
+        Row: {
+          chain: string
+          created_at: string
+          deal_count: number
+          deals: Json
+          deals_text: string | null
+          fetched_at: string
+          id: string
+          source: string | null
+          store_id: string
+          store_name: string
+          week_start: string
+        }
+        Insert: {
+          chain: string
+          created_at?: string
+          deal_count?: number
+          deals?: Json
+          deals_text?: string | null
+          fetched_at?: string
+          id?: string
+          source?: string | null
+          store_id?: string
+          store_name: string
+          week_start: string
+        }
+        Update: {
+          chain?: string
+          created_at?: string
+          deal_count?: number
+          deals?: Json
+          deals_text?: string | null
+          fetched_at?: string
+          id?: string
+          source?: string | null
+          store_id?: string
+          store_name?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
+      store_deals_settings: {
+        Row: {
+          active_days: number
+          cron_secret: string
+          enabled: boolean
+          id: number
+          last_run_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          active_days?: number
+          cron_secret?: string
+          enabled?: boolean
+          id?: number
+          last_run_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active_days?: number
+          cron_secret?: string
+          enabled?: boolean
+          id?: number
+          last_run_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      store_locations: {
+        Row: {
+          chain: string
+          created_at: string
+          id: string
+          last_requested_at: string
+          name: string
+          store_id: string
+          town: string | null
+        }
+        Insert: {
+          chain: string
+          created_at?: string
+          id?: string
+          last_requested_at?: string
+          name: string
+          store_id?: string
+          town?: string | null
+        }
+        Update: {
+          chain?: string
+          created_at?: string
+          id?: string
+          last_requested_at?: string
+          name?: string
+          store_id?: string
+          town?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
