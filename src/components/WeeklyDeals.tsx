@@ -1,71 +1,22 @@
-import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Loader2, Flame, Tag } from "lucide-react";
-
-interface Deal {
-  name: string;
-  brand?: string;
-  price?: string;
-  priceValue?: number;
-  comparePrice?: string;
-  condition?: string;
-  validTo?: string;
-  category?: string;
-}
-
-interface DealRow {
-  chain: string;
-  store_name: string;
-  deal_count: number;
-  deals: Deal[];
-  week_start: string;
-  fetched_at: string;
-}
-
-const CHAIN_LABEL: Record<string, string> = {
-  ica: "ICA",
-  willys: "Willys",
-  hemkop: "Hemköp",
-  lidl: "Lidl",
-  coop: "Coop",
-  citygross: "City Gross",
-};
-
-const VISIBLE = 9;
+import { Loader2, Flame, ArrowRight } from "lucide-react";
+import DealsGrid from "@/components/DealsGrid";
+import { CHAIN_LABEL, isoWeek, useStoreDeals } from "@/hooks/use-store-deals";
+import { trackClickCreateMenu } from "@/lib/analytics";
 
 /** Veckans bästa matfynd – riktiga erbjudanden direkt från butikernas data. */
 const WeeklyDeals = () => {
-  const [rows, setRows] = useState<DealRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { rows, loading } = useStoreDeals();
   const [activeChain, setActiveChain] = useState<string | null>(null);
-  const [expanded, setExpanded] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase
-        .from("store_deals" as any)
-        .select("chain, store_name, deal_count, deals, week_start, fetched_at")
-        .order("deal_count", { ascending: false });
-      const list = ((data as any[]) ?? []) as DealRow[];
-      setRows(list);
-      setActiveChain(list[0]?.chain ?? null);
-      setLoading(false);
-    })();
-  }, []);
+  const active = rows.find((r) => r.chain === (activeChain ?? rows[0]?.chain));
 
-  const active = rows.find((r) => r.chain === activeChain);
-
-  /** Billigast först – det är fynden användaren är här för. */
-  const deals = useMemo(() => {
-    const all = (active?.deals ?? []).filter((d) => d.name && d.price);
-    return [...all].sort((a, b) => (a.priceValue ?? 9999) - (b.priceValue ?? 9999));
-  }, [active]);
-
-  const shown = expanded ? deals.slice(0, 36) : deals.slice(0, VISIBLE);
-
-  const scrollToForm = () =>
+  const scrollToForm = () => {
+    trackClickCreateMenu("deals_section");
     document.getElementById("recipe-form")?.scrollIntoView({ behavior: "smooth" });
+  };
 
   if (loading) {
     return (
@@ -90,8 +41,7 @@ const WeeklyDeals = () => {
             Veckans bästa matfynd
           </h2>
           <p className="font-body text-sm text-muted-foreground mt-1">
-            Hämtat direkt från butikernas egna erbjudanden · gäller v.{" "}
-            {getWeek(active?.week_start)} 
+            Hämtat direkt från butikernas egna erbjudanden · gäller v.{isoWeek(active?.week_start)}
           </p>
         </div>
         <Button onClick={scrollToForm} className="font-display font-bold shrink-0">
@@ -99,19 +49,15 @@ const WeeklyDeals = () => {
         </Button>
       </div>
 
-      {/* Butiksväljare */}
       <div className="flex gap-2 overflow-x-auto no-scrollbar pb-3" role="tablist">
         {rows.map((r) => (
           <button
-            key={r.chain}
+            key={`${r.chain}-${r.store_name}`}
             role="tab"
-            aria-selected={r.chain === activeChain}
-            onClick={() => {
-              setActiveChain(r.chain);
-              setExpanded(false);
-            }}
+            aria-selected={r.chain === active?.chain}
+            onClick={() => setActiveChain(r.chain)}
             className={`shrink-0 rounded-full px-4 py-2 text-sm font-body font-semibold border-2 transition-colors ${
-              r.chain === activeChain
+              r.chain === active?.chain
                 ? "bg-primary text-primary-foreground border-primary"
                 : "bg-card text-muted-foreground border-border hover:border-primary/40"
             }`}
@@ -122,55 +68,27 @@ const WeeklyDeals = () => {
         ))}
       </div>
 
-      <ul className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {shown.map((d, i) => (
-          <li
-            key={`${d.name}-${i}`}
-            className="rounded-2xl border border-border bg-card p-4 flex flex-col gap-1 hover:border-primary/40 transition-colors"
-          >
-            <div className="flex items-start justify-between gap-2">
-              <p className="font-display font-bold text-sm text-foreground leading-snug">
-                {d.name}
-              </p>
-              <span className="shrink-0 rounded-lg bg-primary/10 text-primary px-2 py-1 text-xs font-bold">
-                {d.price}
-              </span>
-            </div>
-            {d.brand && <p className="text-xs text-muted-foreground">{d.brand}</p>}
-            {d.comparePrice && (
-              <p className="text-[11px] text-muted-foreground/70 flex items-center gap-1">
-                <Tag className="w-3 h-3" aria-hidden="true" />
-                {d.comparePrice}
-              </p>
-            )}
-            {d.condition && (
-              <p className="text-[11px] text-muted-foreground/60">{d.condition}</p>
-            )}
-          </li>
-        ))}
-      </ul>
+      {active && <DealsGrid deals={active.deals} chain={active.chain} />}
 
-      {deals.length > VISIBLE && (
-        <div className="text-center mt-4">
-          <Button variant="outline" onClick={() => setExpanded(!expanded)}>
-            {expanded ? "Visa mindre" : `Visa fler fynd (${deals.length - VISIBLE})`}
-          </Button>
-        </div>
-      )}
+      <div className="mt-5 flex flex-wrap gap-3 text-sm font-body">
+        <Link
+          to="/veckans-matfynd"
+          className="inline-flex items-center gap-1 text-primary font-semibold hover:underline"
+        >
+          Alla veckans matfynd <ArrowRight className="w-4 h-4" aria-hidden="true" />
+        </Link>
+        {active && (
+          <Link
+            to={`/${active.chain === "hemkop" ? "hemkop" : active.chain}-erbjudanden`}
+            className="inline-flex items-center gap-1 text-primary font-semibold hover:underline"
+          >
+            {CHAIN_LABEL[active.chain] ?? active.chain}-erbjudanden{" "}
+            <ArrowRight className="w-4 h-4" aria-hidden="true" />
+          </Link>
+        )}
+      </div>
     </section>
   );
 };
-
-/** ISO-veckonummer för datumsträngen (YYYY-MM-DD). */
-function getWeek(dateStr?: string): number {
-  const d = dateStr ? new Date(dateStr) : new Date();
-  const target = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
-  const day = (target.getUTCDay() + 6) % 7;
-  target.setUTCDate(target.getUTCDate() - day + 3);
-  const firstThursday = new Date(Date.UTC(target.getUTCFullYear(), 0, 4));
-  const fday = (firstThursday.getUTCDay() + 6) % 7;
-  firstThursday.setUTCDate(firstThursday.getUTCDate() - fday + 3);
-  return 1 + Math.round((target.getTime() - firstThursday.getTime()) / (7 * 24 * 3600 * 1000));
-}
 
 export default WeeklyDeals;
