@@ -1,5 +1,6 @@
 import RecipeForm from "@/components/RecipeForm";
 import RecipeShowcase from "@/components/RecipeShowcase";
+import WeeklyDeals from "@/components/WeeklyDeals";
 import Seo from "@/components/Seo";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
@@ -11,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { BookOpen, LogIn, Mail, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
+import { trackClickCreateMenu, trackNewsletterSignup } from "@/lib/analytics";
 import {
   PotIllustration,
   CarrotIllustration,
@@ -29,7 +31,12 @@ const Index = () => {
   const [nlDone, setNlDone] = useState(false);
 
   const scrollToForm = () => {
+    trackClickCreateMenu("hero");
     document.getElementById("recipe-form")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const scrollToDeals = () => {
+    document.getElementById("veckans-matfynd")?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
@@ -51,6 +58,7 @@ const Index = () => {
         } else throw error;
       } else {
         setNlDone(true);
+        trackNewsletterSignup("home_hero");
         toast.success("Välkommen! Du får ditt första veckobrev nästa måndag 🎉");
       }
     } catch (err) {
@@ -197,31 +205,43 @@ const Index = () => {
             </span>
 
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
-              <span className="text-foreground">Fem middagar.</span>
+              <span className="text-foreground">Gör veckans mat</span>
               <br />
-              <span className="hero-text-gradient">Under 500 kronor.</span>
+              <span className="hero-text-gradient">billigare.</span>
             </h1>
 
             <div className="hero-strip max-w-xs mx-auto md:mx-0" aria-hidden="true" />
 
             <p className="font-body text-lg md:text-xl text-muted-foreground max-w-lg mx-auto md:mx-0 leading-relaxed">
-              VeckansMatFynd läser veckans erbjudanden i svenska matbutiker och bygger
-              en balanserad veckomeny för fyra personer – med inköpslista. Skickas
-              gratis till din e-post varje vecka.
+              Se veckans riktiga matfynd i ICA, Willys, Hemköp, Coop och Lidl – och få en
+              billig veckomeny med recept och handlingslista. Fem middagar för fyra
+              personer under 500 kronor.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start pt-2">
               <button onClick={scrollToForm} className="btn-hero-primary">
                 <ChefHatIllustration size={22} className="text-primary-foreground" />
-                Skapa recept nu
+                Skapa min veckomeny
               </button>
+              <button onClick={scrollToDeals} className="btn-hero-secondary">
+                <ShoppingBagIllustration size={20} className="text-primary" />
+                Se veckans matfynd
+              </button>
+            </div>
+            <div className="flex justify-center md:justify-start pt-1">
               {user ? (
-                <Link to="/saved" className="btn-hero-secondary">
+                <Link
+                  to="/saved"
+                  className="inline-flex items-center gap-2 text-sm font-body font-semibold text-muted-foreground hover:text-primary transition-colors"
+                >
                   <BookOpen className="w-4 h-4" />
                   Mina sparade recept
                 </Link>
               ) : (
-                <Link to="/auth" className="btn-hero-secondary">
+                <Link
+                  to="/auth"
+                  className="inline-flex items-center gap-2 text-sm font-body font-semibold text-muted-foreground hover:text-primary transition-colors"
+                >
                   <LogIn className="w-4 h-4" />
                   Logga in för att spara
                 </Link>

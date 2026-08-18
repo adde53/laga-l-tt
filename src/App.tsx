@@ -15,6 +15,9 @@ import MatladaBudget from "./pages/MatladaBudget";
 import BilligVeckomatsedel from "./pages/BilligVeckomatsedel";
 import BilligMat from "./pages/BilligMat";
 import Unsubscribe from "./pages/Unsubscribe";
+import VeckansMatfynd from "./pages/VeckansMatfynd";
+import StoreOffers from "./pages/StoreOffers";
+import BilligVeckomenyVecka from "./pages/BilligVeckomenyVecka";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +41,14 @@ const App = () => (
             <Route path="/billig-veckomatsedel" element={<BilligVeckomatsedel />} />
             <Route path="/billig-mat" element={<BilligMat />} />
             <Route path="/avprenumerera" element={<Unsubscribe />} />
+            <Route path="/veckans-matfynd" element={<VeckansMatfynd />} />
+            <Route path="/billig-veckomeny/:week" element={<BilligVeckomenyVecka />} />
+            <Route path="/ica-erbjudanden" element={<StoreOffers chain="ica" />} />
+            <Route path="/willys-erbjudanden" element={<StoreOffers chain="willys" />} />
+            <Route path="/hemkop-erbjudanden" element={<StoreOffers chain="hemkop" />} />
+            <Route path="/lidl-erbjudanden" element={<StoreOffers chain="lidl" />} />
+            <Route path="/coop-erbjudanden" element={<StoreOffers chain="coop" />} />
+            <Route path="/citygross-erbjudanden" element={<StoreOffers chain="citygross" />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
