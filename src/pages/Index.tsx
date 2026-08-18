@@ -1,5 +1,6 @@
 import RecipeForm from "@/components/RecipeForm";
 import RecipeShowcase from "@/components/RecipeShowcase";
+import WeeklyDeals from "@/components/WeeklyDeals";
 import Seo from "@/components/Seo";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
@@ -11,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { BookOpen, LogIn, Mail, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
+import { trackClickCreateMenu, trackNewsletterSignup } from "@/lib/analytics";
 import {
   PotIllustration,
   CarrotIllustration,
@@ -29,7 +31,12 @@ const Index = () => {
   const [nlDone, setNlDone] = useState(false);
 
   const scrollToForm = () => {
+    trackClickCreateMenu("hero");
     document.getElementById("recipe-form")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const scrollToDeals = () => {
+    document.getElementById("veckans-matfynd")?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
@@ -51,6 +58,7 @@ const Index = () => {
         } else throw error;
       } else {
         setNlDone(true);
+        trackNewsletterSignup("home_hero");
         toast.success("Välkommen! Du får ditt första veckobrev nästa måndag 🎉");
       }
     } catch (err) {
