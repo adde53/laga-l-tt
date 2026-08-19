@@ -9,6 +9,7 @@ import DaySelector from "./DaySelector";
 import StoreLocationPicker, { StoreLocation } from "./StoreLocationPicker";
 import { ChefHat, Sparkles, CalendarDays, Loader2, History, X } from "lucide-react";
 import { toast } from "sonner";
+import { trackMenuCreated, trackAddToShoppingList } from "@/lib/analytics";
 
 const STORES = [
   { value: "none", label: "Ingen specifik butik" },
@@ -438,8 +439,17 @@ const RecipeForm = () => {
         />
       </div>
 
-      {/* Budget + Portions + Store row */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
+      {/* Budgetblock – budget, portioner och butik hör ihop */}
+      <div className="rounded-2xl border border-border bg-muted/30 p-4 space-y-3 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
+        <div>
+          <p className="section-label">💰 Din budget</p>
+          <p className="text-xs font-body text-muted-foreground mt-1">
+            Exempel: för {portions || "4"} personer ·{" "}
+            {mode === "weekly" ? `${selectedDays.length} middagar` : "1 middag"} · max{" "}
+            {budget || "100"} kr
+          </p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <div className="space-y-2">
           <label className="section-label">💰 Budget</label>
           <Input
@@ -477,6 +487,7 @@ const RecipeForm = () => {
               ))}
             </SelectContent>
           </Select>
+        </div>
         </div>
       </div>
 
