@@ -404,6 +404,10 @@ const RecipeForm = () => {
         };
         addToHistory(entry);
         setHistory(getHistory());
+        trackMenuCreated(
+          mode === "weekly" ? selectedDays.length : 1,
+          Number(budget) || undefined,
+        );
       }
     } catch (e) {
       console.error(e);
@@ -627,7 +631,7 @@ const RecipeForm = () => {
       {result && (
         <>
           <RecipeResult content={result} craving={craving} budget={budget} mode={mode} cuisines={cuisines} selectedDays={selectedDays} store={store} />
-          {!isLoading && <ShoppingList content={result} />}
+          {!isLoading && <ShoppingList content={result} onReady={trackAddToShoppingList} />}
         </>
       )}
     </div>
