@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Bookmark, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { trackViewRecipe } from "@/lib/analytics";
 
 interface RecipeResultProps {
   content: string;
@@ -106,6 +107,15 @@ const RecipeResult = ({ content, craving, budget, mode, cuisines, selectedDays, 
   }, [content]);
 
   const overallCost = useMemo(() => extractCostInfo(content), [content]);
+
+  const recipeTitle = useMemo(
+    () => content.match(/^#+\s*(.+)$/m)?.[1]?.replace(/[*_#]/g, "").trim() ?? "",
+    [content],
+  );
+
+  useEffect(() => {
+    if (recipeTitle) trackViewRecipe(recipeTitle);
+  }, [recipeTitle]);
 
   const saveRecipe = async (title: string, recipeContent: string) => {
     if (!user) {
