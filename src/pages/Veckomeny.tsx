@@ -30,8 +30,8 @@ const Veckomeny = () => (
         body: "Menyn följer hur vardagen faktiskt ser ut. Måndag till torsdag är snabba middagar på 20–30 minuter, fredagen är extra enkel, och helgen får de recept som är värda lite mer tid vid spisen.",
       },
       {
-        heading: "Inköpslista och matlådor",
-        body: "Till varje veckomeny hör en samlad inköpslista, så att du handlar en gång istället för fem. Laga en portion extra av de rätter som håller sig bra i kylen och du har lunchlådor på köpet.",
+        heading: "Handlingslista och matlådor",
+        body: "Till varje veckomeny hör en samlad handlingslista, så att du handlar en gång istället för fem. Laga en portion extra av de rätter som håller sig bra i kylen och du har lunchlådor på köpet.",
       },
     ]}
     faq={[

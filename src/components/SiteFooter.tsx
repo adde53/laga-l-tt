@@ -26,11 +26,17 @@ const SiteFooter = () => (
 
         <nav className="grid grid-cols-2 gap-x-10 gap-y-2 text-xs font-body text-muted-foreground/70 mx-auto md:mx-0">
           <Link to="/" className="hover:text-primary transition-colors">Start</Link>
+          <Link to="/veckans-matfynd" className="hover:text-primary transition-colors">Veckans matfynd</Link>
           <Link to="/veckomeny" className="hover:text-primary transition-colors">Veckomeny</Link>
           <Link to="/billig-veckomatsedel" className="hover:text-primary transition-colors">Billig veckomatsedel</Link>
           <Link to="/billiga-recept" className="hover:text-primary transition-colors">Billiga recept</Link>
           <Link to="/billig-mat" className="hover:text-primary transition-colors">Billig mat</Link>
           <Link to="/matlada-budget" className="hover:text-primary transition-colors">Matlådor på budget</Link>
+          <Link to="/ica-erbjudanden" className="hover:text-primary transition-colors">ICA-erbjudanden</Link>
+          <Link to="/willys-erbjudanden" className="hover:text-primary transition-colors">Willys-erbjudanden</Link>
+          <Link to="/hemkop-erbjudanden" className="hover:text-primary transition-colors">Hemköp-erbjudanden</Link>
+          <Link to="/coop-erbjudanden" className="hover:text-primary transition-colors">Coop-erbjudanden</Link>
+          <Link to="/lidl-erbjudanden" className="hover:text-primary transition-colors">Lidl-erbjudanden</Link>
           <Link to="/saved" className="hover:text-primary transition-colors">Mina recept</Link>
           <Link to="/avprenumerera" className="hover:text-primary transition-colors">Avprenumerera</Link>
         </nav>
