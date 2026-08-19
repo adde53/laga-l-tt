@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Mail, CheckCircle, Utensils } from "lucide-react";
+import { trackNewsletterSignup } from "@/lib/analytics";
 
 const NewsletterSignup = () => {
   const [email, setEmail] = useState("");
@@ -27,6 +28,7 @@ const NewsletterSignup = () => {
       if (error) throw error;
 
       setSubscribed(true);
+      trackNewsletterSignup("hero");
       if (data?.alreadySubscribed) {
         toast.info("Du prenumererar redan! 🎉");
       } else if (data?.emailSent) {
@@ -61,10 +63,10 @@ const NewsletterSignup = () => {
         </div>
         <div>
           <h3 className="font-display text-lg font-bold text-foreground">
-            Gratis veckomeny – varje måndag
+            Få veckans billigaste middagar varje måndag
           </h3>
           <p className="text-sm text-muted-foreground">
-            5 recept · 4 portioner · under 500 kr · baserat på veckans erbjudanden
+            5 middagar · 4 portioner · under 500 kr · byggt på veckans matfynd
           </p>
         </div>
       </div>
