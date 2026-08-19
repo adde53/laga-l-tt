@@ -1,10 +1,12 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ShoppingCart, Plus, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 interface ShoppingListProps {
   content: string;
+  /** Anropas när en handlingslista faktiskt visas (för mätning). */
+  onReady?: () => void;
 }
 
 interface ShoppingItem {
@@ -30,12 +32,17 @@ const parseShoppingItems = (content: string): ShoppingItem[] => {
     .map((text) => ({ text, price: parsePrice(text) }));
 };
 
-const ShoppingList = ({ content }: ShoppingListProps) => {
+const ShoppingList = ({ content, onReady }: ShoppingListProps) => {
   const initialItems = useMemo(() => parseShoppingItems(content), [content]);
   const [items, setItems] = useState<ShoppingItem[]>(initialItems);
   const [removed, setRemoved] = useState<Set<number>>(new Set());
   const [checked, setChecked] = useState<Set<number>>(new Set());
   const [newItem, setNewItem] = useState("");
+
+  useEffect(() => {
+    if (initialItems.length > 0) onReady?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialItems]);
 
   // Sync when content changes
   useMemo(() => {
